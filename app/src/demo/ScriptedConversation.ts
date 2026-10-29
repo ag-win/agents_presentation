@@ -20,12 +20,12 @@ export class ScriptedConversation {
     this.after = after
   }
 
-  static birthdayToast(): ScriptedConversation {
+  static birthdaySpeech(): ScriptedConversation {
     return new ScriptedConversation(
       [
         { author: 'john', text: "Priya's birthday is on Saturday!", pauseMs: 1100 },
-        { author: 'deborah', text: "I'm giving the toast and I've got nothing.", pauseMs: 1700 },
-        { author: 'blessing', text: 'She loves hiking and terrible puns.', pauseMs: 1500 },
+        { author: 'deborah', text: "I'm giving the birthday speech and I've got nothing.", pauseMs: 1700 },
+        { author: 'blessing', text: 'She loves hiking and dancing.', pauseMs: 1500 },
       ],
       [
         { author: 'deborah', text: 'Ha! Perfect. Stealing that.', pauseMs: 1500 },

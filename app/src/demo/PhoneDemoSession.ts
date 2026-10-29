@@ -26,7 +26,7 @@ export class PhoneDemoSession {
   private aiMessageId: number | null = null
   private abort: AbortController | null = null
 
-  constructor(client: LlmStreamClient = new LlmStreamClient(), script: ScriptedConversation = ScriptedConversation.birthdayToast()) {
+  constructor(client: LlmStreamClient = new LlmStreamClient(), script: ScriptedConversation = ScriptedConversation.birthdaySpeech()) {
     this.client = client
     this.script = script
     this.snapshot = this.initial(DEFAULT_SLOWMO)
