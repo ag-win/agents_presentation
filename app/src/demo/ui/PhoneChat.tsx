@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import { demoSession } from '../demoSession'
-import type { Author, ChatMessage, DemoSnapshot } from '../types'
-
-const NAMES: Record<Author, string> = { sam: 'Sam', leo: 'Leo', me: 'You', ai: 'AI', system: '' }
+import { FRIENDS, displayName, isFriend } from '../people'
+import type { ChatMessage, DemoSnapshot } from '../types'
 
 /** Highlights "@AI" wherever it appears in a message. */
 function WithMentions({ text }: { text: string }) {
@@ -15,17 +14,21 @@ function WithMentions({ text }: { text: string }) {
 
 function Bubble({ m }: { m: ChatMessage }) {
   if (m.author === 'system') return <div className="demo-sys">{m.text}</div>
+  // Friends get their own bright name colour and a matching pale bubble (via CSS variables).
+  const style = isFriend(m.author) ? ({ '--who': FRIENDS[m.author].color, '--tint': FRIENDS[m.author].tint } as CSSProperties) : undefined
   return (
-    <div className={`demo-bubble demo-bubble--${m.author}`}>
-      {m.author !== 'me' && <small>{m.author === 'ai' ? '✦ AI' : NAMES[m.author]}</small>}
+    <div className={`demo-bubble demo-bubble--${isFriend(m.author) ? 'friend' : m.author}`} style={style}>
+      {m.author !== 'me' && <small>{m.author === 'ai' ? '✦ AI' : displayName(m.author)}</small>}
       <WithMentions text={m.text} />
     </div>
   )
 }
 
+const GROUP_SUBTITLE = `${Object.values(FRIENDS).map((f) => f.name).join(', ')}, You`
+
 function header(snap: DemoSnapshot): { title: string; sub: string } {
-  if (snap.typing) return { title: snap.mode === 'planned' ? 'Birthday plans' : 'Chat', sub: `${NAMES[snap.typing]} is typing…` }
-  if (snap.mode === 'planned') return { title: 'Birthday plans', sub: 'Sam, Leo, You' }
+  if (snap.typing) return { title: snap.mode === 'planned' ? 'Birthday plans' : 'Chat', sub: `${displayName(snap.typing)} is typing…` }
+  if (snap.mode === 'planned') return { title: 'Birthday plans', sub: GROUP_SUBTITLE }
   if (snap.mode === 'free') return { title: 'Assistant chat', sub: 'Start every message with @AI' }
   return { title: 'Group chat', sub: 'Choose a scenario below' }
 }

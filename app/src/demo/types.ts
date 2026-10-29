@@ -1,4 +1,7 @@
-export type Author = 'sam' | 'leo' | 'me' | 'ai' | 'system'
+/** The scripted friends in the group chat. Their look lives in people.ts. */
+export type FriendId = 'john' | 'deborah' | 'blessing'
+
+export type Author = FriendId | 'me' | 'ai' | 'system'
 
 export interface ChatMessage {
   readonly id: number

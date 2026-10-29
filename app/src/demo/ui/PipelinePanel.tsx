@@ -20,9 +20,10 @@ function DottedLane({ lane, dots }: { lane: Lane; dots: readonly FlightDot[] }) 
   )
 }
 
-function Box({ label, glow, pulse, children }: { label: string; glow?: boolean; pulse?: number; children: ReactNode }) {
+/** io = coral pill (Input/Output), llm = green rectangle: the same shapes and colours as the augmented-LLM diagram. */
+function Box({ kind, label, glow, pulse, children }: { kind: 'io' | 'llm'; label: string; glow?: boolean; pulse?: number; children: ReactNode }) {
   return (
-    <div className={`demo-box${glow ? ' is-glowing' : ''}`}>
+    <div className={`demo-box demo-box--${kind}${glow ? ' is-glowing' : ''}`}>
       {pulse ? <span key={pulse} className="demo-pulse" /> : null}
       <h3>{label}</h3>
       {children}
@@ -41,17 +42,17 @@ export function PipelinePanel({ snap }: { snap: DemoSnapshot }) {
   const backend = backendLine(snap.backend)
   return (
     <section className="demo-pipe" aria-label="What happens behind the phone">
-      <Box label="INPUT" glow={p.inputGlow}>
+      <Box kind="io" label="INPUT" glow={p.inputGlow}>
         <p className={`demo-box__text${p.inputText ? '' : ' is-empty'}`}>{p.inputText || 'Waiting for a prompt…'}</p>
       </Box>
       <DottedLane lane="in" dots={snap.dots} />
-      <Box label="LLM" glow={p.llmGlow}>
+      <Box kind="llm" label="LLM" glow={p.llmGlow}>
         <p className="demo-box__text">Large language model</p>
         <p className={`demo-box__meta${backend.warn ? ' is-warn' : ''}`}>{backend.text}</p>
         <p className="demo-box__meta">tokens sent: {p.llmTokens}</p>
       </Box>
       <DottedLane lane="out" dots={snap.dots} />
-      <Box label="OUTPUT" pulse={p.outputPulse}>
+      <Box kind="io" label="OUTPUT" pulse={p.outputPulse}>
         <p className={`demo-box__text demo-box__text--scroll${p.outputText ? '' : ' is-empty'}`}>{p.outputText || 'Nothing yet'}</p>
         <p className="demo-box__meta">tokens received: {p.outputTokens}</p>
       </Box>

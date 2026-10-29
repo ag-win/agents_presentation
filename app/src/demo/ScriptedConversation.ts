@@ -1,5 +1,7 @@
+import type { FriendId } from './types'
+
 export interface ScriptLine {
-  readonly author: 'sam' | 'leo'
+  readonly author: FriendId
   readonly text: string
   /** How long the friend "types" before the message appears. */
   readonly pauseMs: number
@@ -21,13 +23,14 @@ export class ScriptedConversation {
   static birthdayToast(): ScriptedConversation {
     return new ScriptedConversation(
       [
-        { author: 'sam', text: "Priya's birthday is on Saturday!", pauseMs: 1100 },
-        { author: 'leo', text: "I'm giving the toast and I've got nothing.", pauseMs: 1700 },
-        { author: 'sam', text: 'She loves hiking and terrible puns.', pauseMs: 1500 },
+        { author: 'john', text: "Priya's birthday is on Saturday!", pauseMs: 1100 },
+        { author: 'deborah', text: "I'm giving the toast and I've got nothing.", pauseMs: 1700 },
+        { author: 'blessing', text: 'She loves hiking and terrible puns.', pauseMs: 1500 },
       ],
       [
-        { author: 'leo', text: 'Ha! Perfect. Stealing that.', pauseMs: 1500 },
-        { author: 'sam', text: "Cake is at 3pm, don't be late.", pauseMs: 1300 },
+        { author: 'deborah', text: 'Ha! Perfect. Stealing that.', pauseMs: 1500 },
+        { author: 'john', text: "Cake is at 3pm, don't be late.", pauseMs: 1300 },
+        { author: 'blessing', text: "I'll bring the balloons.", pauseMs: 1200 },
       ],
     )
   }
