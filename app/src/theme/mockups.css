@@ -1,0 +1,112 @@
+/* Fake app UIs used on the "everyday AI" slide. Deliberately self-contained: these imitate other
+   products, so they use their own palette (--mk-*) instead of the deck tokens. Sizes are px on the
+   1920x1080 stage. All text is generic; no real brand names or logos. */
+.mk { --mk-line: #d8dce3; --mk-soft: #f3f4f7; --mk-ink: #1f2430; --mk-muted: #667085; --mk-blue: #1a5fd0;
+  width: 1360px; height: 610px; position: relative; color: var(--mk-ink); font-family: var(--font-sans); font-size: 21px; }
+
+/* browser frame */
+.mk-win { width: 100%; height: 100%; background: #fff; border: 2px solid var(--mk-line); border-radius: 18px; overflow: hidden;
+  display: flex; flex-direction: column; box-shadow: 0 14px 40px rgba(20, 22, 28, 0.18); }
+.mk-tabs { height: 46px; background: #e6e9ef; display: flex; align-items: flex-end; gap: 14px; padding: 0 16px; flex: none; }
+.mk-dots { display: flex; gap: 8px; align-self: center; margin-right: 10px; }
+.mk-dots i { width: 13px; height: 13px; border-radius: 50%; background: #c3c8d2; display: block; }
+.mk-tab { background: #fff; border-radius: 12px 12px 0 0; padding: 9px 22px; font-size: 17px; min-width: 220px; color: var(--mk-ink); }
+.mk-urlrow { height: 50px; display: flex; align-items: center; gap: 14px; padding: 0 18px; border-bottom: 1px solid var(--mk-line); flex: none; color: var(--mk-muted); font-size: 24px; }
+.mk-url { flex: 1; background: var(--mk-soft); border-radius: 999px; padding: 5px 20px; font-size: 17px; color: var(--mk-muted); }
+.mk-page { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+.mk-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 60px; background: linear-gradient(transparent, #fff); pointer-events: none; }
+.spark { color: #7b5cf0; }
+
+/* 1. chatbot in a browser */
+.mk-chat { display: flex; height: 100%; }
+.mk-side { width: 250px; background: var(--mk-soft); padding: 18px 14px; font-size: 17px; flex: none; }
+.mk-side b { display: block; padding: 10px 12px; background: #fff; border: 1px solid var(--mk-line); border-radius: 10px; margin-bottom: 14px; }
+.mk-side p { margin: 0; padding: 8px 12px; color: var(--mk-muted); border-radius: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mk-side p.on { background: #e4e8f0; color: var(--mk-ink); }
+.mk-main { flex: 1; display: flex; flex-direction: column; padding: 22px 40px 18px; gap: 16px; min-width: 0; }
+.mk-msgs { flex: 1; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
+.mk-u { align-self: flex-end; background: #e9edf5; padding: 12px 20px; border-radius: 18px 18px 4px 18px; max-width: 70%; }
+.mk-a { display: flex; gap: 14px; max-width: 86%; align-items: flex-start; line-height: 1.4; }
+.mk-av { width: 36px; height: 36px; flex: none; border-radius: 50%; background: linear-gradient(135deg, #7b5cf0, #3aa0ff); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-top: 2px; }
+.mk-a p { margin: 0 0 8px; }
+.mk-a ul { margin: 0; padding-left: 22px; }
+.mk-input { border: 2px solid var(--mk-line); border-radius: 999px; padding: 12px 22px; display: flex; justify-content: space-between; color: var(--mk-muted); font-size: 19px; flex: none; }
+.mk-input span:last-child { background: var(--mk-ink); color: #fff; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+
+/* 2. search + AI overview */
+.mk-search { padding: 16px 30px 0; height: 100%; }
+.mk-sbar { display: flex; align-items: center; gap: 22px; }
+.mk-logo { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; color: var(--mk-blue); }
+.mk-box { flex: 1; border: 2px solid var(--mk-line); border-radius: 999px; padding: 9px 22px; font-size: 21px; display: flex; justify-content: space-between; box-shadow: 0 2px 8px rgba(20, 22, 28, 0.08); }
+.mk-box span:last-child { color: var(--mk-blue); }
+.mk-stabs { display: flex; gap: 26px; margin: 12px 0 12px 118px; font-size: 17px; color: var(--mk-muted); border-bottom: 1px solid var(--mk-line); }
+.mk-stabs span { padding: 6px 2px 9px; }
+.mk-stabs .on { color: var(--mk-blue); border-bottom: 3px solid var(--mk-blue); }
+.mk-body { margin-left: 118px; max-width: 980px; }
+.mk-ai { border-radius: 18px; padding: 16px 22px 14px; background: linear-gradient(135deg, #f1eeff, #eaf4ff); border: 1px solid #d9d4fb; }
+.mk-ai h4 { margin: 0 0 8px; font-size: 17px; color: #5a3fd1; letter-spacing: 0.02em; }
+.mk-ai p { margin: 0 0 6px; font-size: 19px; line-height: 1.35; }
+.mk-ai ol { margin: 0; padding-left: 24px; font-size: 18px; line-height: 1.38; }
+.mk-src { display: flex; gap: 10px; margin-top: 10px; font-size: 14px; }
+.mk-src span { background: #fff; border: 1px solid #d9d4fb; border-radius: 999px; padding: 3px 12px; color: var(--mk-muted); }
+.mk-res { margin-top: 14px; }
+.mk-res small { display: block; font-size: 14px; color: var(--mk-muted); }
+.mk-res a { display: block; font-size: 21px; color: var(--mk-blue); margin: 1px 0 2px; text-decoration: none; }
+.mk-res p { margin: 0; font-size: 16px; color: #4a5160; line-height: 1.35; }
+
+/* 3. chat app (phone) */
+.mk-phonewrap { display: flex; align-items: center; justify-content: center; gap: 56px; height: 100%; }
+.mk-phone { width: 340px; height: 606px; background: #1b1d22; border-radius: 44px; padding: 12px; box-shadow: 0 14px 40px rgba(20, 22, 28, 0.28); flex: none; }
+.mk-screen { width: 100%; height: 100%; background: #efe9df; border-radius: 34px; overflow: hidden; display: flex; flex-direction: column; font-size: 15px; }
+.mk-phead { background: #0b6b5d; color: #fff; padding: 30px 14px 10px; display: flex; gap: 10px; align-items: center; flex: none; }
+.mk-phead .mk-av { background: #cfe9e4; color: #0b6b5d; width: 34px; height: 34px; font-size: 14px; font-weight: 700; margin: 0; }
+.mk-phead b { display: block; font-size: 16px; }
+.mk-phead small { opacity: 0.8; font-size: 12px; }
+.mk-pmsgs { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+.mk-b { max-width: 82%; padding: 7px 11px; border-radius: 10px; background: #fff; line-height: 1.3; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1); }
+.mk-b small { display: block; font-size: 11px; font-weight: 700; margin-bottom: 1px; color: #b4570f; }
+.mk-b.me { align-self: flex-end; background: #d9fdd3; }
+.mk-b.ai { background: #fff; border: 2px solid #8b6cf0; }
+.mk-b.ai small { color: #5a3fd1; }
+.mk-b ol { margin: 4px 0 0; padding-left: 18px; }
+.mk-btn { margin-top: 6px; background: #0b6b5d; color: #fff; border-radius: 999px; text-align: center; padding: 5px 0; font-weight: 700; font-size: 13px; }
+.mk-chips { display: flex; gap: 6px; padding: 0 10px 8px; flex: none; flex-wrap: wrap; }
+.mk-chips span { background: #fff; border: 1px solid #c9d6d2; border-radius: 999px; padding: 4px 11px; font-size: 13px; color: #0b6b5d; }
+.mk-pinput { background: #f6f6f6; padding: 8px 10px; display: flex; gap: 8px; align-items: center; flex: none; }
+.mk-pinput span:first-child { flex: 1; background: #fff; border-radius: 999px; padding: 7px 14px; color: #8a8f98; }
+.mk-pinput span:last-child { background: linear-gradient(135deg, #7b5cf0, #3aa0ff); color: #fff; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.mk-note { width: 300px; font-size: 22px; line-height: 1.35; color: var(--mk-ink); background: var(--mk-soft); border-radius: 16px; padding: 18px 22px; border: 1px solid var(--mk-line); }
+.mk-note b { display: block; color: #5a3fd1; margin-bottom: 4px; }
+
+/* 4. IDE */
+.mk-ide { background: #fff; }
+.mk-ide .mk-tabs { background: #dfe3ea; height: 38px; }
+.mk-idebody { flex: 1; display: flex; min-height: 0; }
+.mk-act { width: 50px; background: #2c3240; flex: none; display: flex; flex-direction: column; gap: 16px; align-items: center; padding-top: 14px; }
+.mk-act i { width: 22px; height: 22px; border: 2px solid #8a93a6; border-radius: 5px; display: block; }
+.mk-act i:first-child { border-color: #fff; }
+.mk-tree { width: 200px; background: var(--mk-soft); padding: 12px 10px; font-size: 15px; flex: none; color: var(--mk-muted); line-height: 1.9; }
+.mk-tree b { color: var(--mk-ink); font-size: 13px; letter-spacing: 0.06em; display: block; margin-bottom: 4px; }
+.mk-tree .on { background: #dde4f2; color: var(--mk-ink); border-radius: 6px; padding-left: 8px; }
+.mk-tree .in { padding-left: 14px; }
+.mk-ed { flex: 1; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--mk-line); }
+.mk-edtab { height: 34px; background: #f3f4f7; display: flex; font-size: 15px; flex: none; }
+.mk-edtab span { padding: 7px 18px; background: #fff; border-top: 2px solid var(--mk-blue); }
+.mk-code { flex: 1; font-family: var(--font-mono); font-size: 16.5px; line-height: 1.62; padding: 12px 0; overflow: hidden; }
+.mk-code div { white-space: pre; }
+.mk-code .n { display: inline-block; width: 44px; text-align: right; padding-right: 16px; color: #9aa1b0; }
+.mk-code .add { background: #e4f7e8; }
+.mk-code .ghost { color: #a3a9b8; font-style: italic; }
+.mk-code .tabhint { margin-left: 18px; font-family: var(--font-sans); font-style: normal; font-size: 12px; background: #e8ebf2; color: var(--mk-muted); border-radius: 5px; padding: 0 8px; vertical-align: middle; }
+.kw { color: #a626a4; } .fn { color: #4078f2; } .num { color: #b76b01; } .str { color: #50a14f; } .cm { color: #8a8f98; font-style: italic; }
+.mk-assist { width: 420px; flex: none; display: flex; flex-direction: column; font-size: 16px; background: #fbfbfd; }
+.mk-assist header { padding: 10px 16px; font-weight: 700; border-bottom: 1px solid var(--mk-line); font-size: 15px; letter-spacing: 0.03em; }
+.mk-amsgs { flex: 1; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+.mk-amsgs .mk-u { font-size: 16px; padding: 8px 14px; max-width: 90%; }
+.mk-steps { display: flex; flex-direction: column; gap: 4px; font-size: 15px; color: var(--mk-muted); }
+.mk-steps b { color: #2a8a4a; margin-right: 8px; }
+.mk-diff { font-family: var(--font-mono); font-size: 13px; border: 1px solid var(--mk-line); border-radius: 8px; overflow: hidden; background: #fff; }
+.mk-diff div { padding: 2px 10px; white-space: pre; }
+.mk-diff .d { background: #fde7e7; color: #a32323; } .mk-diff .a { background: #e1f6e5; color: #1f7a3a; }
+.mk-amsgs p { margin: 0; line-height: 1.35; }
+.mk-status { height: 26px; background: #1a5fd0; color: #fff; font-size: 13px; display: flex; align-items: center; padding: 0 14px; gap: 22px; flex: none; }

@@ -1,0 +1,45 @@
+/* Design tokens. Every colour/size in the app should come from here so the
+   theme (e.g. light -> dark projector theme) is a one-file change. */
+:root {
+  --bg: #ffffff;
+  --ink: #14161c;
+  --ink-muted: #5b5e66;
+  --card: #f5f5f5;
+  --card-border: #d9d9dc;
+  --grid: #e3e3e3;
+  --accent: #b45309;
+  --accent-ink: #ffffff;
+  --backdrop: #0b0c10; /* behind the rounded slide / builder cards */
+  --radius-frame: 28px;
+
+  --font-sans: Calibri, Carlito, 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+
+  /* Type scale, authored for a 1920x1080 stage. */
+  --fs-hero: 100px;
+  --fs-title: 64px;
+  --fs-section-num: 220px;
+  --fs-section-title: 76px;
+  --fs-body: 36px;
+  --fs-card: 30px;
+  --fs-cite: 20px;
+
+  --stage-w: 1920px;
+  --stage-h: 1080px;
+  --margin: 96px;
+}
+
+/* Workflow diagrams (presentation/diagrams). Kept separate so they can be re-themed together. */
+:root {
+  --dg-io-fill: #fdece8;     --dg-io-stroke: #e9826c;    --dg-io-ink: #c8472b;
+  --dg-llm-fill: #eaf5e3;    --dg-llm-stroke: #6aa84f;   --dg-llm-ink: #3f7f2b;
+  --dg-logic-fill: #eeedf9;  --dg-logic-stroke: #7a6fc9; --dg-logic-ink: #4c3fa5;
+  --dg-neutral-fill: #ececec; --dg-neutral-stroke: #8a8a8a; --dg-neutral-ink: #2b2d33;
+  --dg-hot-fill: var(--accent); --dg-hot-stroke: #8a3d06; --dg-hot-ink: #ffffff;
+  --dg-edge: #5b5e66;
+  --dg-edge-soft: #9a9ca3;
+  --dg-label: #2b2d33;
+  --dg-group-purple: #5b4bb0;
+  --dg-group-teal: #1f6f84;
+  --dg-group-orange: #b45309;
+}
