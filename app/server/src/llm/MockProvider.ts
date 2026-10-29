@@ -22,7 +22,8 @@ export class MockProvider implements LlmProvider {
 
   async *stream(messages: readonly ChatMessage[], signal: AbortSignal, options: GenerationOptions = {}): AsyncIterable<StreamEvent> {
     const asked = [...messages].reverse().find((m) => m.role === 'user')?.content ?? ''
-    const tokens = this.tokenize(this.reply(asked, options))
+    const system = messages.find((m) => m.role === 'system')?.content ?? ''
+    const tokens = this.tokenize(this.reply(asked, options, system))
     for (const text of tokens) {
       if (signal.aborted) return
       await new Promise((resolve) => setTimeout(resolve, this.delayMs))
@@ -31,7 +32,7 @@ export class MockProvider implements LlmProvider {
     yield { type: 'done', stats: { tokens: tokens.length, finishReason: 'stop' } }
   }
 
-  private reply(asked: string, options: GenerationOptions): string {
+  private reply(asked: string, options: GenerationOptions, system: string): string {
     if (options.jsonMode) return this.fakeExtraction(asked)
     if (asked.startsWith('FACTS:')) {
       return 'Sorry about the problem with your order. Items that arrive damaged can be refunded or replaced within 14 days. Please send a photo of the damage and we will sort it out.'
@@ -41,7 +42,8 @@ export class MockProvider implements LlmProvider {
     }
     return (
       `This is the offline mock model, so this is canned text. You asked: "${asked}". ` +
-      'Add OLLAMA_API_KEY to app/server/.env to get a real answer from Ollama Cloud.'
+      'Add OLLAMA_API_KEY to app/server/.env to get a real answer from Ollama Cloud.' +
+      (system ? ` (System prompt in use: "${system.slice(0, 60)}")` : '')
     )
   }
 

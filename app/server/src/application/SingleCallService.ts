@@ -1,5 +1,6 @@
 import type { Prompt } from '../domain/Prompt.ts'
 import type { StreamEvent } from '../domain/StreamEvent.ts'
+import type { SystemPrompt } from '../domain/SystemPrompt.ts'
 import type { LlmProvider } from '../llm/LlmProvider.ts'
 import type { PromptComposer } from './PromptComposer.ts'
 
@@ -19,8 +20,8 @@ export class SingleCallService {
     this.composer = composer
   }
 
-  stream(prompt: Prompt, signal: AbortSignal): AsyncIterable<StreamEvent> {
-    return this.provider.stream(this.composer.compose(prompt), signal)
+  stream(prompt: Prompt, signal: AbortSignal, system?: SystemPrompt): AsyncIterable<StreamEvent> {
+    return this.provider.stream(this.composer.compose(prompt, system), signal)
   }
 
   info(): ServiceInfo {
