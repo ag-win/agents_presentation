@@ -21,13 +21,14 @@ export class LlmStreamClient {
   }
 
   /** Yields start, token..., done (or error) as the backend produces them. */
-  async *stream(prompt: string, signal: AbortSignal): AsyncGenerator<LlmStreamEvent> {
+  /** `system` replaces the server's built-in system prompt for this call (an empty string sends none). */
+  async *stream(prompt: string, signal: AbortSignal, system?: string): AsyncGenerator<LlmStreamEvent> {
     let res: Response
     try {
       res = await fetch(`${this.baseUrl}/api/llm/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify(system === undefined ? { prompt } : { prompt, system }),
         signal,
       })
     } catch (cause) {

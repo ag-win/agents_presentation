@@ -12,9 +12,10 @@ export interface ChatMessage {
 /** idle: nothing chosen yet; planned: scripted group chat; free: plain chatbot where every prompt needs @AI. */
 export type Mode = 'idle' | 'planned' | 'free'
 
-export type DotKind = 'prompt' | 'token'
-/** 'in' runs from the Input box to the LLM, 'out' from the LLM to the Output box. */
-export type Lane = 'in' | 'out'
+/** prompt = the user's message (big dot); token = one streamed token (small dot); system = the system prompt joining the prompt. */
+export type DotKind = 'prompt' | 'token' | 'system'
+/** 'in' runs from the Input box to the LLM, 'out' from the LLM to the Output box, 'sys' from the system-prompt box to the LLM. */
+export type Lane = 'in' | 'out' | 'sys'
 
 /** One glowing dot on a dotted line. Position is derived from startedAt/duration, so it survives re-renders. */
 export interface FlightDot {

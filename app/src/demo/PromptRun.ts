@@ -1,4 +1,5 @@
 import type { LlmStreamClient } from './LlmStreamClient'
+import type { SystemPromptSource } from './SystemPromptSource'
 import type { Scheduler } from './Scheduler'
 import type { Timings } from './Timings'
 import { StreamBuffer } from './TokenBuffer'
@@ -27,6 +28,7 @@ export class PromptRun {
   private readonly scheduler: Scheduler
   private readonly host: RunHost
   private readonly signal: AbortSignal
+  private readonly systemSource: SystemPromptSource | null
 
   private readonly buffer = new StreamBuffer<string>()
   private failure: string | null = null
@@ -41,6 +43,7 @@ export class PromptRun {
     scheduler: Scheduler,
     host: RunHost,
     signal: AbortSignal,
+    systemSource: SystemPromptSource | null = null,
   ) {
     this.prompt = prompt
     this.timings = timings
@@ -48,21 +51,32 @@ export class PromptRun {
     this.scheduler = scheduler
     this.host = host
     this.signal = signal
+    this.systemSource = systemSource
   }
 
   start(): void {
     this.host.patchPipeline({
       inputGlow: true, inputText: this.prompt, llmGlow: false, llmTokens: 0, outputText: '', outputTokens: 0,
     })
-    void this.consume() // real request begins now, in the background
+    // Normally the real request begins now, in the background. With a system prompt source it waits until the
+    // prompt reaches the LLM, so a system prompt edited while the dot is still travelling is the one that is used.
+    if (!this.systemSource) void this.consume()
     this.scheduler.after(this.timings.inputGlowMs, () => this.sendPromptDot())
   }
 
   private sendPromptDot(): void {
     this.host.patchPipeline({ inputGlow: false })
     const id = this.host.launchDot('prompt', 'in', this.timings.promptTravelMs)
+    // The system prompt rides in from the side and joins the prompt just before the LLM.
+    const systemDot = this.systemSource ? this.host.launchDot('system', 'sys', this.timings.promptTravelMs) : null
     this.scheduler.after(this.timings.promptTravelMs, () => {
       this.host.removeDot(id)
+      if (systemDot !== null) this.host.removeDot(systemDot)
+      if (this.systemSource) {
+        const system = this.systemSource.current()
+        this.systemSource.lock()
+        void this.consume(system)
+      }
       this.host.patchPipeline({ llmGlow: true })
       this.emitting = true
       this.tick()
@@ -102,9 +116,9 @@ export class PromptRun {
     if (!this.emitting && this.inFlight === 0 && !this.signal.aborted) this.host.finished(this.failure)
   }
 
-  private async consume(): Promise<void> {
+  private async consume(system?: string): Promise<void> {
     try {
-      for await (const event of this.client.stream(this.prompt, this.signal)) {
+      for await (const event of this.client.stream(this.prompt, this.signal, system)) {
         if (event.type === 'token') this.buffer.push(event.text)
         else if (event.type === 'error') this.failure = event.message
       }

@@ -2,6 +2,7 @@ import { LlmStreamClient } from './LlmStreamClient'
 import { PromptRun, type RunHost } from './PromptRun'
 import { ScriptedConversation, type ScriptLine } from './ScriptedConversation'
 import { Scheduler } from './Scheduler'
+import type { SystemPromptSource } from './SystemPromptSource'
 import { Timings } from './Timings'
 import type { Author, ChatMessage, DemoSnapshot, DotKind, Lane, PipelineState, Slowmo } from './types'
 
@@ -25,10 +26,17 @@ export class PhoneDemoSession {
   private nextId = 1
   private aiMessageId: number | null = null
   private abort: AbortController | null = null
+  private readonly systemSource: SystemPromptSource | null
 
-  constructor(client: LlmStreamClient = new LlmStreamClient(), script: ScriptedConversation = ScriptedConversation.birthdaySpeech()) {
+  constructor(
+    client: LlmStreamClient = new LlmStreamClient(),
+    script: ScriptedConversation = ScriptedConversation.birthdaySpeech(),
+    /** Optional: supplies a system prompt to each call at the moment the prompt reaches the LLM. */
+    systemSource: SystemPromptSource | null = null,
+  ) {
     this.client = client
     this.script = script
+    this.systemSource = systemSource
     this.snapshot = this.initial(DEFAULT_SLOWMO)
   }
 
@@ -59,6 +67,7 @@ export class PhoneDemoSession {
     this.abort?.abort()
     this.abort = null
     this.scheduler.clear()
+    this.systemSource?.unlock()
     this.aiMessageId = null
     this.snapshot = this.initial(this.snapshot.slowmo, this.snapshot.backend)
     this.emit()
@@ -136,7 +145,7 @@ export class PhoneDemoSession {
     this.abort = new AbortController()
     this.aiMessageId = null
     this.update({ busy: true })
-    new PromptRun(prompt, timings, this.client, this.scheduler, this.runHost(), this.abort.signal).start()
+    new PromptRun(prompt, timings, this.client, this.scheduler, this.runHost(), this.abort.signal, this.systemSource).start()
   }
 
   /** The session's view for a PromptRun: small, specific callbacks instead of handing over `this`. */
@@ -168,6 +177,7 @@ export class PhoneDemoSession {
 
   private finishRun(error: string | null): void {
     this.abort = null
+    this.systemSource?.unlock()
     const continueScript = !error && this.snapshot.mode === 'planned'
     // Keep the textbox locked across the pause before the friends reply, so it doesn't flicker open.
     this.update({ busy: false, scriptPlaying: continueScript })
