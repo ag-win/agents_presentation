@@ -85,11 +85,11 @@
 .demo-pulse { position: absolute; inset: -7px; border: 5px solid #f59e0b; border-radius: 72px; pointer-events: none; animation: demo-pulse 0.5s ease-out forwards; }
 @keyframes demo-pulse { from { opacity: 0.95; transform: scale(1); } to { opacity: 0; transform: scale(1.035); } }
 
-.demo-lane { position: relative; height: 110px; flex: none; }
+.demo-lane { position: relative; height: var(--lane-h, 110px); flex: none; }
 .demo-lane::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 5px dotted #6b7385; transform: translateX(-50%); }
 .demo-dot { position: absolute; top: 0; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #fde68a 35%, #f59e0b 100%); animation-name: demo-fall; animation-timing-function: linear; animation-fill-mode: both; }
 .demo-dot--prompt { width: 40px; height: 40px; margin: -20px 0 0 -20px; box-shadow: 0 0 26px 9px rgba(245, 158, 11, 0.85); }
 .demo-dot--token { width: 15px; height: 15px; margin: -7px 0 0 -7px; box-shadow: 0 0 12px 4px rgba(245, 158, 11, 0.9); }
-@keyframes demo-fall { from { transform: translateY(0); } to { transform: translateY(110px); } }
+@keyframes demo-fall { from { transform: translateY(0); } to { transform: translateY(var(--lane-h, 110px)); } }
 
 @media (prefers-reduced-motion: reduce) { .demo-box.is-glowing { animation: none; box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.5); } }

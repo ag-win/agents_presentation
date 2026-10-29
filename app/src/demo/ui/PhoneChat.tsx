@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import { demoSession } from '../demoSession'
+import type { PhoneDemoSession } from '../PhoneDemoSession'
 import { FRIENDS, displayName, isFriend } from '../people'
 import type { ChatMessage, DemoSnapshot } from '../types'
 
@@ -33,7 +34,7 @@ function header(snap: DemoSnapshot): { title: string; sub: string } {
   return { title: 'Group chat', sub: 'Choose a scenario below' }
 }
 
-export function PhoneChat({ snap }: { snap: DemoSnapshot }) {
+export function PhoneChat({ snap, session = demoSession }: { snap: DemoSnapshot; session?: PhoneDemoSession }) {
   const [draft, setDraft] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -62,7 +63,7 @@ export function PhoneChat({ snap }: { snap: DemoSnapshot }) {
     e.preventDefault()
     if (locked || !draft.trim()) return
     stick.current = true
-    demoSession.send(draft)
+    session.send(draft)
     setDraft('')
   }
 

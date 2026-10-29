@@ -1,0 +1,56 @@
+/* System-prompt demo: the LLM box's dropdown, the faint editor box beside it, and the connector between them.
+   Authored for the 1920x1080 slide stage; sizes follow the --demo-fs-* scale in demo.css. */
+
+.demo-body--sys { grid-template-columns: 470px 1fr; }
+.demo-body--sys .demo-right { justify-content: flex-end; }
+.demo-pipe--sys { width: 780px; --lane-h: 64px; --conn-w: 76px; flex: none; }
+
+/* dropdown arrow on the LLM box */
+.demo-box__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.demo-box__head h3 { margin: 0; }
+.demo-chev { width: 44px; height: 44px; border: 2px solid var(--box-stroke); border-radius: 50%; background: rgba(255, 255, 255, 0.6); color: var(--box-ink); display: flex; align-items: center; justify-content: center; padding: 0; transition: background 0.15s; }
+.demo-chev:hover { background: #fff; }
+.demo-chev svg { transition: transform 0.3s; }
+.demo-chev.is-open svg { transform: rotate(180deg); }
+
+/* the revealed system prompt (animates open by growing a grid row) */
+.demo-sysblock { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+.demo-sysblock > div { overflow: hidden; min-height: 0; }
+.demo-sysblock.is-open { grid-template-rows: 1fr; }
+.demo-sysblock.is-open > div { margin-top: 12px; padding: 12px 18px 14px; border-radius: 12px; background: var(--dg-logic-fill); border: 3px solid var(--dg-logic-stroke); overflow: auto; max-height: 190px; }
+.demo-sysblock h4 { margin: 0 0 4px; font-size: var(--demo-fs-label, 20px); letter-spacing: 0.12em; color: var(--dg-logic-ink); }
+.demo-sysblock p { margin: 0; font-size: 24px; line-height: 1.3; color: var(--dg-logic-ink); font-weight: 700; overflow-wrap: anywhere; }
+.demo-sysblock p.is-empty { opacity: 0.6; font-weight: 400; }
+
+/* connector from the system-prompt box to the LLM box, with the purple "system prompt" dot */
+.demo-conn { position: absolute; right: 100%; top: 50%; width: var(--conn-w); border-top: 5px dotted #7a6fc9; }
+.demo-dot--system { background: radial-gradient(circle, #fff 0%, #d8d2ff 35%, #7c3aed 100%); width: 34px; height: 34px; box-shadow: 0 0 22px 8px rgba(124, 58, 237, 0.7); }
+.demo-dot--x { top: 0; left: 0; margin: -17px 0 0 -17px; animation-name: demo-slide-x; }
+@keyframes demo-slide-x { from { transform: translateX(0); } to { transform: translateX(var(--conn-w)); } }
+
+/* the box between the phone and the LLM */
+.demo-aside { position: absolute; right: calc(100% + var(--conn-w)); top: 50%; transform: translateY(-50%); z-index: 4; }
+.sysbox { width: 400px; border: 3px dashed rgba(20, 22, 28, 0.3); border-radius: 18px; background: transparent; color: rgba(20, 22, 28, 0.55); transition: background 0.2s, border-color 0.2s, color 0.2s; }
+.sysbox:hover { border-color: rgba(20, 22, 28, 0.5); color: rgba(20, 22, 28, 0.75); }
+.sysbox.is-open { background: rgba(255, 255, 255, 0.78); border-style: solid; border-color: rgba(124, 58, 237, 0.55); color: var(--ink); box-shadow: 0 10px 34px rgba(20, 22, 28, 0.18); }
+.sysbox__top { display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 16px 22px; background: none; border: 0; text-align: left; color: inherit; }
+.sysbox__label { font-size: var(--demo-fs-label, 20px); font-weight: 700; letter-spacing: 0.14em; }
+.sysbox__name { font-size: 30px; font-weight: 700; }
+.sysbox__hint { font-size: 20px; opacity: 0.8; }
+.sysbox__editor { padding: 0 18px 18px; display: flex; flex-direction: column; gap: 12px; }
+.sysbox__carousel { display: flex; align-items: center; gap: 10px; }
+.sysbox__carousel > button { width: 52px; height: 52px; flex: none; border-radius: 50%; border: 0; background: #7c3aed; color: #fff; font-size: 34px; line-height: 1; padding-bottom: 4px; }
+.sysbox__carousel > button:disabled { background: #b9a7ea; cursor: default; }
+.sysbox__current { flex: 1; text-align: center; display: flex; flex-direction: column; }
+.sysbox__current b { font-size: 27px; line-height: 1.15; }
+.sysbox__current small { font-size: 19px; opacity: 0.7; }
+.sysbox__dots { display: flex; gap: 10px; justify-content: center; }
+.sysbox__dots button { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #7c3aed; background: transparent; padding: 0; }
+.sysbox__dots button[aria-current='true'] { background: #7c3aed; }
+.sysbox textarea { width: 100%; resize: none; border: 2px solid #d6cdf3; border-radius: 12px; padding: 12px 14px; font-family: inherit; font-size: 23px; line-height: 1.3; color: var(--ink); background: #fff; outline: 0; }
+.sysbox textarea:focus { border-color: #7c3aed; }
+.sysbox textarea:disabled { background: #f1eefb; }
+.sysbox__note { margin: 0; font-size: 19px; opacity: 0.75; }
+
+/* keep both scenario buttons on one line under the phone */
+.demo-body--sys .demo-scenarios .demo-btn { font-size: 24px; padding: 9px 18px; white-space: nowrap; }
