@@ -34,6 +34,7 @@ export class MockProvider implements LlmProvider {
 
   private reply(asked: string, options: GenerationOptions, system: string): string {
     if (options.jsonMode) return this.fakeExtraction(asked)
+    if (options.purpose === 'classify') return this.fakeLabel(asked)
     if (asked.startsWith('FACTS:')) {
       return 'Sorry about the problem with your order. Items that arrive damaged can be refunded or replaced within 14 days. Please send a photo of the damage and we will sort it out.'
     }
@@ -45,6 +46,13 @@ export class MockProvider implements LlmProvider {
       'Add OLLAMA_API_KEY to app/server/.env to get a real answer from Ollama Cloud.' +
       (system ? ` (System prompt in use: "${system.slice(0, 60)}")` : '')
     )
+  }
+
+  private fakeLabel(asked: string): string {
+    if (/(recipe|cook|food|eat|dinner|lunch|breakfast|restaurant|rice|chicken|egg|soup|bake)/i.test(asked)) return 'food'
+    if (/(flight|travel|trip|hotel|visa|beach|city|tour|holiday|airport)/i.test(asked)) return 'travel'
+    if (/(headache|pain|sleep|health|doctor|fever|symptom|exercise|medicine|cough)/i.test(asked)) return 'health'
+    return 'general'
   }
 
   private fakeExtraction(asked: string): string {

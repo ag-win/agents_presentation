@@ -1,11 +1,12 @@
 import type { ChatMessage } from '../domain/ChatMessage.ts'
 import type { StreamEvent } from '../domain/StreamEvent.ts'
 import { UpstreamError } from '../errors/AppError.ts'
+import type { FetchLike } from '../net/FetchLike.ts'
 import type { GenerationOptions, LlmProvider } from './LlmProvider.ts'
 import { NdjsonLineSplitter } from './NdjsonLineSplitter.ts'
 import { OllamaChunkMapper } from './OllamaChunkMapper.ts'
 
-export type FetchLike = (url: string, init: RequestInit) => Promise<Response>
+export type { FetchLike }
 
 export interface OllamaCloudOptions {
   readonly apiKey: string

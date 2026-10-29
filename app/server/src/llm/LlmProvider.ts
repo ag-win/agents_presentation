@@ -7,6 +7,8 @@ export interface GenerationOptions {
   readonly jsonMode?: boolean
   readonly temperature?: number
   readonly maxTokens?: number
+  /** Hint that this call just picks a label. Real models ignore it; the offline mock uses it to fake a decision. */
+  readonly purpose?: 'classify'
 }
 
 /**

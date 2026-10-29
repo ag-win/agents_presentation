@@ -13,6 +13,9 @@ export class AppConfig {
   readonly maxPromptChars: number
   /** How many earlier chat turns the chain demo may send along with a new message. */
   readonly maxHistoryTurns: number
+  readonly braveApiKey: string | undefined
+  readonly braveBaseUrl: string
+  readonly searchResultCount: number
 
   private constructor(values: {
     host: string
@@ -25,6 +28,9 @@ export class AppConfig {
     maxTokens: number
     maxPromptChars: number
     maxHistoryTurns: number
+    braveApiKey: string | undefined
+    braveBaseUrl: string
+    searchResultCount: number
   }) {
     this.host = values.host
     this.port = values.port
@@ -36,10 +42,14 @@ export class AppConfig {
     this.maxTokens = values.maxTokens
     this.maxPromptChars = values.maxPromptChars
     this.maxHistoryTurns = values.maxHistoryTurns
+    this.braveApiKey = values.braveApiKey
+    this.braveBaseUrl = values.braveBaseUrl
+    this.searchResultCount = values.searchResultCount
   }
 
   static fromEnv(env: NodeJS.ProcessEnv): AppConfig {
     const key = env.OLLAMA_API_KEY?.trim()
+    const braveKey = env.BRAVE_API_KEY?.trim()
     return new AppConfig({
       // Localhost only: the browser reaches us through the Vite proxy, so the API key never leaves this machine.
       host: env.HOST?.trim() || '127.0.0.1',
@@ -52,6 +62,9 @@ export class AppConfig {
       maxTokens: 300,
       maxPromptChars: 2000,
       maxHistoryTurns: 12,
+      braveApiKey: braveKey ? braveKey : undefined,
+      braveBaseUrl: (env.BRAVE_BASE_URL?.trim() || 'https://api.search.brave.com').replace(/\/+$/, ''),
+      searchResultCount: 5,
     })
   }
 }
