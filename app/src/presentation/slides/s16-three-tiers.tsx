@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ContentSlide } from '../layouts'
+import { LiveDemoButton } from '../LiveDemoButton'
 import { PhoneDemoOverlay } from '../../demo/ui/PhoneDemoOverlay'
 import type { SlideMeta } from '../types'
 
@@ -24,14 +25,7 @@ export default function S16() {
               <p>{t.lines.join(' ')}</p>
               <p className="muted" style={{ fontSize: 26 }}>{t.eg}</p>
               <p style={{ marginTop: 'auto', fontWeight: 700, color: t.hot ? 'var(--accent)' : undefined }}>{t.who}</p>
-              {t.demo && (
-                // Deliberately low-key: the audience shouldn't notice it; the presenter knows where it is.
-                <button className="tier__peek" onClick={() => setDemoOpen(true)} aria-label="Open the live single-call demo" title="Live demo">
-                  <svg width="16" height="24" viewBox="0 0 16 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                    <rect x="1" y="1" width="14" height="22" rx="3" /><line x1="6" y1="19" x2="10" y2="19" />
-                  </svg>
-                </button>
-              )}
+              {t.demo && <LiveDemoButton className="live-demo-btn--card" onClick={() => setDemoOpen(true)} />}
             </div>
           ))}
         </div>
