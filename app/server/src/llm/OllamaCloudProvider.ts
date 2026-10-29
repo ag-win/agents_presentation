@@ -46,14 +46,17 @@ export class OllamaCloudProvider implements LlmProvider {
     const splitter = new NdjsonLineSplitter()
     for await (const bytes of response.body) {
       for (const line of splitter.push(decoder.decode(bytes, { stream: true }))) {
-        const event = this.mapper.map(line)
-        if (event) yield event
+        yield* this.mapper.mapAll(line)
       }
     }
-    for (const line of splitter.flush()) {
-      const event = this.mapper.map(line)
-      if (event) yield event
-    }
+    for (const line of splitter.flush()) yield* this.mapper.mapAll(line)
+  }
+
+  /** Our message -> Ollama's: tool requests and tool results have their own shapes. */
+  private static toWire(m: ChatMessage): Record<string, unknown> {
+    if (m.role === 'tool') return { role: 'tool', tool_name: m.toolName, content: m.content }
+    if (m.toolCalls.length) return { role: 'assistant', content: m.content, tool_calls: m.toolCalls.map((c) => ({ function: { name: c.name, arguments: c.arguments } })) }
+    return { role: m.role, content: m.content }
   }
 
   private async send(messages: readonly ChatMessage[], signal: AbortSignal, options: GenerationOptions): Promise<Response> {
@@ -61,7 +64,8 @@ export class OllamaCloudProvider implements LlmProvider {
       model: this.options.model,
       stream: true,
       think: false, // a plain answer, no reasoning phase
-      messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      messages: messages.map(OllamaCloudProvider.toWire),
+      ...(options.tools?.length ? { tools: options.tools.map((t) => ({ type: 'function', function: { name: t.name, description: t.description, parameters: t.parameters } })) } : {}),
       options: { temperature: options.temperature ?? this.options.temperature, num_predict: options.maxTokens ?? this.options.maxTokens },
       ...(options.jsonMode ? { format: 'json' } : {}),
     }

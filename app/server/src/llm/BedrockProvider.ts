@@ -16,6 +16,16 @@ export interface BedrockOptions {
   readonly fetch?: FetchLike
 }
 
+interface BedrockPayload {
+  message?: string
+  contentBlockIndex?: number
+  start?: { toolUse?: { toolUseId?: string; name?: string } }
+  delta?: { text?: string; toolUse?: { input?: string } }
+  stopReason?: string
+  usage?: { outputTokens?: number }
+  metrics?: { latencyMs?: number }
+}
+
 const JSON_ONLY = 'Respond with a single JSON object and nothing else.'
 
 /**
@@ -46,22 +56,31 @@ export class BedrockProvider implements LlmProvider {
     let stopReason: string | undefined
     let tokens: number | undefined
     let latencyMs: number | undefined
+    const toolBlocks = new Map<number, { id: string; name: string; json: string }>() // tool-use blocks being streamed
 
     for await (const bytes of response.body) {
       for (const message of decoder.push(bytes)) {
         const kind = message.headers[':message-type']
-        const data = JSON.parse(decode.decode(message.payload) || '{}') as {
-          message?: string
-          delta?: { text?: string }
-          stopReason?: string
-          usage?: { outputTokens?: number }
-          metrics?: { latencyMs?: number }
-        }
+        const data = JSON.parse(decode.decode(message.payload) || '{}') as BedrockPayload
         if (kind === 'exception') throw this.describeException(message.headers[':exception-type'] ?? 'error', data.message)
         switch (message.headers[':event-type']) {
-          case 'contentBlockDelta':
-            if (data.delta?.text) yield { type: 'token', text: data.delta.text } // reasoning deltas carry no text field
+          case 'contentBlockStart':
+            if (data.start?.toolUse) toolBlocks.set(data.contentBlockIndex ?? 0, { id: data.start.toolUse.toolUseId ?? '', name: data.start.toolUse.name ?? '', json: '' })
             break
+          case 'contentBlockDelta': {
+            if (data.delta?.text) yield { type: 'token', text: data.delta.text } // reasoning deltas carry no text field
+            const block = toolBlocks.get(data.contentBlockIndex ?? 0)
+            if (block && data.delta?.toolUse?.input) block.json += data.delta.toolUse.input
+            break
+          }
+          case 'contentBlockStop': {
+            const block = toolBlocks.get(data.contentBlockIndex ?? 0)
+            if (block) {
+              toolBlocks.delete(data.contentBlockIndex ?? 0)
+              yield { type: 'tool_call', call: { id: block.id, name: block.name, arguments: BedrockProvider.parseArguments(block.json) } }
+            }
+            break
+          }
           case 'messageStop':
             stopReason = data.stopReason
             break
@@ -75,13 +94,41 @@ export class BedrockProvider implements LlmProvider {
     yield { type: 'done', stats: { tokens, durationMs: latencyMs, finishReason: stopReason } }
   }
 
+  private static parseArguments(json: string): Record<string, unknown> {
+    try {
+      return json.trim() ? (JSON.parse(json) as Record<string, unknown>) : {}
+    } catch {
+      return {}
+    }
+  }
+
+  /** Our messages -> Converse messages. Tool requests become toolUse blocks; tool results become toolResult blocks in a user turn. */
+  private static toConverse(messages: readonly ChatMessage[]): { role: string; content: unknown[] }[] {
+    const out: { role: string; content: unknown[] }[] = []
+    for (const m of messages) {
+      if (m.role === 'system') continue
+      if (m.role === 'tool') {
+        const block = { toolResult: { toolUseId: m.toolCallId, content: [{ text: m.content }] } }
+        const last = out[out.length - 1]
+        if (last && last.role === 'user' && last.content.every((c) => 'toolResult' in (c as object))) last.content.push(block)
+        else out.push({ role: 'user', content: [block] })
+      } else if (m.toolCalls.length) {
+        out.push({ role: 'assistant', content: [...(m.content ? [{ text: m.content }] : []), ...m.toolCalls.map((c) => ({ toolUse: { toolUseId: c.id, name: c.name, input: c.arguments } }))] })
+      } else {
+        out.push({ role: m.role, content: [{ text: m.content }] })
+      }
+    }
+    return out
+  }
+
   private async send(messages: readonly ChatMessage[], signal: AbortSignal, options: GenerationOptions): Promise<Response> {
     const system = messages.filter((m) => m.role === 'system').map((m) => m.content)
     if (options.jsonMode) system.push(JSON_ONLY)
     const body = JSON.stringify({
-      messages: messages.filter((m) => m.role !== 'system').map((m) => ({ role: m.role, content: [{ text: m.content }] })),
+      messages: BedrockProvider.toConverse(messages),
       ...(system.length ? { system: [{ text: system.join('\n\n') }] } : {}),
       inferenceConfig: { maxTokens: options.maxTokens ?? this.options.maxTokens, temperature: options.temperature ?? this.options.temperature },
+      ...(options.tools?.length ? { toolConfig: { tools: options.tools.map((t) => ({ toolSpec: { name: t.name, description: t.description, inputSchema: { json: t.parameters } } })) } } : {}),
     })
     const url = new URL(`https://bedrock-runtime.${this.options.region}.amazonaws.com/model/${encodeURIComponent(this.model)}/converse-stream`)
     try {

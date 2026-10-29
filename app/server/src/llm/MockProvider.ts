@@ -22,8 +22,19 @@ export class MockProvider implements LlmProvider {
 
   async *stream(messages: readonly ChatMessage[], signal: AbortSignal, options: GenerationOptions = {}): AsyncIterable<StreamEvent> {
     const asked = [...messages].reverse().find((m) => m.role === 'user')?.content ?? ''
+    const tool = options.tools?.[0]
+    if (tool && !messages.some((m) => m.role === 'tool')) {
+      // Offline stand-in for a model that decides to use its tool: pick the first number out of the question as the order id.
+      const id = /\b(\d{3,8})\b/.exec(asked)?.[1]
+      if (id) {
+        yield { type: 'tool_call', call: { id: 'mock_call_1', name: tool.name, arguments: { order_id: id } } }
+        yield { type: 'done', stats: { finishReason: 'tool_use' } }
+        return
+      }
+    }
+    const toolResult = [...messages].reverse().find((m) => m.role === 'tool')?.content
     const system = messages.find((m) => m.role === 'system')?.content ?? ''
-    const tokens = this.tokenize(this.reply(asked, options, system))
+    const tokens = this.tokenize(toolResult ? `Here is what I found in our system: ${toolResult.slice(0, 160)}` : this.reply(asked, options, system))
     for (const text of tokens) {
       if (signal.aborted) return
       await new Promise((resolve) => setTimeout(resolve, this.delayMs))
@@ -33,6 +44,10 @@ export class MockProvider implements LlmProvider {
   }
 
   private reply(asked: string, options: GenerationOptions, system: string): string {
+    if (options.purpose === 'guard') return /ignore (all )?(your )?(previous|prior)|system prompt|password/i.test(asked) ? 'BLOCK: tries to change instructions' : 'OK'
+    if (options.purpose === 'support_route') return this.fakeSupportRoute(asked)
+    if (options.purpose === 'plan') return this.fakePlan(asked)
+    if (options.purpose === 'quality') return 'PASS'
     if (options.jsonMode) return this.fakeExtraction(asked)
     if (options.purpose === 'classify') return this.fakeLabel(asked)
     if (asked.startsWith('FACTS:')) {
@@ -46,6 +61,36 @@ export class MockProvider implements LlmProvider {
       'Add OLLAMA_API_KEY to app/server/.env to get a real answer from Ollama Cloud.' +
       (system ? ` (System prompt in use: "${system.slice(0, 60)}")` : '')
     )
+  }
+
+  private fakeSupportRoute(asked: string): string {
+    if (/(lawyer|furious|legal|charged (my card )?twice|fraud|speak to a (real )?(person|human))/i.test(asked)) return 'escalate'
+    if (this.fakeParts(asked).length > 1) return 'multi'
+    return this.fakePartLabel(asked)
+  }
+
+  private fakePartLabel(text: string): string {
+    if (/(cracked|broken|damaged|faulty|stopped working|split|refund|replacement)/i.test(text)) return 'complaint'
+    if (/(where is|order \d|not arrived|hasn't arrived|tracking|package|delivery status|\blate\b)/i.test(text)) return 'order'
+    if (/(does the|how long does the battery|which is better|reviews?|spec|waterproof|any good)/i.test(text)) return 'product'
+    if (/(thanks|thank you|great service|love|please fix|suggest)/i.test(text)) return 'feedback'
+    return 'other'
+  }
+
+  /** Splits a message into sentences that each look like a different kind of request. */
+  private fakeParts(asked: string): { label: string; request: string }[] {
+    const parts = (asked.match(/[^.?!]+[.?!]*/g) ?? []).map((p) => p.trim()).filter(Boolean)
+    const tasks: { label: string; request: string }[] = []
+    for (const part of parts) {
+      const label = this.fakePartLabel(part)
+      if (label !== 'other' && !tasks.some((t) => t.label === label)) tasks.push({ label, request: part })
+    }
+    return tasks.slice(0, 3)
+  }
+
+  private fakePlan(asked: string): string {
+    const tasks = this.fakeParts(asked)
+    return JSON.stringify({ tasks: tasks.length ? tasks : [{ label: 'order', request: asked }] })
   }
 
   private fakeLabel(asked: string): string {

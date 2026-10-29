@@ -1,4 +1,5 @@
 import type { ChatMessage } from '../domain/ChatMessage.ts'
+import type { ToolDefinition } from '../domain/Tool.ts'
 import type { StreamEvent } from '../domain/StreamEvent.ts'
 
 /** Per-call tweaks. Everything is optional; providers fall back to their own defaults. */
@@ -8,7 +9,9 @@ export interface GenerationOptions {
   readonly temperature?: number
   readonly maxTokens?: number
   /** Hint that this call just picks a label. Real models ignore it; the offline mock uses it to fake a decision. */
-  readonly purpose?: 'classify'
+  readonly purpose?: 'classify' | 'guard' | 'support_route' | 'plan' | 'quality'
+  /** Tools the model may ask the app to run. The model replies with tool_call events instead of (or before) text. */
+  readonly tools?: readonly ToolDefinition[]
 }
 
 /**
