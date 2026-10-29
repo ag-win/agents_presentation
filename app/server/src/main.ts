@@ -1,7 +1,10 @@
+import { ChainService } from './application/ChainService.ts'
 import { PromptComposer } from './application/PromptComposer.ts'
 import { SingleCallService } from './application/SingleCallService.ts'
+import { SupportChainFactory } from './chain/SupportChainFactory.ts'
 import { AppConfig } from './config/AppConfig.ts'
 import { HttpServer } from './http/HttpServer.ts'
+import { ChainStreamRoute } from './http/routes/ChainStreamRoute.ts'
 import { HealthRoute } from './http/routes/HealthRoute.ts'
 import { StreamRoute } from './http/routes/StreamRoute.ts'
 import { ProviderFactory } from './llm/ProviderFactory.ts'
@@ -14,10 +17,15 @@ async function main(): Promise<void> {
 
   const provider = ProviderFactory.create(config)
   const service = new SingleCallService(provider, new PromptComposer())
+  const chainService = new ChainService(SupportChainFactory.create(provider), provider)
   const server = new HttpServer(
     config.host,
     config.port,
-    [new HealthRoute(service), new StreamRoute(service, config.maxPromptChars, logger)],
+    [
+      new HealthRoute(service),
+      new StreamRoute(service, config.maxPromptChars, logger),
+      new ChainStreamRoute(chainService, { maxChars: config.maxPromptChars, maxTurns: config.maxHistoryTurns }, logger),
+    ],
     logger,
   )
 

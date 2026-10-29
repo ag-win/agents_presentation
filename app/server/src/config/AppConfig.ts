@@ -11,6 +11,8 @@ export class AppConfig {
   readonly temperature: number
   readonly maxTokens: number
   readonly maxPromptChars: number
+  /** How many earlier chat turns the chain demo may send along with a new message. */
+  readonly maxHistoryTurns: number
 
   private constructor(values: {
     host: string
@@ -22,6 +24,7 @@ export class AppConfig {
     temperature: number
     maxTokens: number
     maxPromptChars: number
+    maxHistoryTurns: number
   }) {
     this.host = values.host
     this.port = values.port
@@ -32,6 +35,7 @@ export class AppConfig {
     this.temperature = values.temperature
     this.maxTokens = values.maxTokens
     this.maxPromptChars = values.maxPromptChars
+    this.maxHistoryTurns = values.maxHistoryTurns
   }
 
   static fromEnv(env: NodeJS.ProcessEnv): AppConfig {
@@ -47,6 +51,7 @@ export class AppConfig {
       temperature: 0.7,
       maxTokens: 300,
       maxPromptChars: 2000,
+      maxHistoryTurns: 12,
     })
   }
 }

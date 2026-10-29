@@ -58,6 +58,17 @@ describe('OllamaCloudProvider', () => {
     assert.deepEqual(body.options, { temperature: 0.5, num_predict: 50 })
   })
 
+  it('asks for JSON and applies per-call settings when options say so', async () => {
+    let body: Record<string, unknown> = {}
+    const p = provider(async (_url, init) => {
+      body = JSON.parse(String(init.body))
+      return streamOf(['{"message":{"content":"{}"},"done":false}\n'])
+    })
+    await collect(p.stream([ChatMessage.user('x')], new AbortController().signal, { jsonMode: true, temperature: 0.1, maxTokens: 99 }))
+    assert.equal(body.format, 'json')
+    assert.deepEqual(body.options, { temperature: 0.1, num_predict: 99 })
+  })
+
   it('explains a rejected key without leaking it', async () => {
     const p = provider(async () => new Response('unauthorized', { status: 401 }))
     await assert.rejects(collect(p.stream([ChatMessage.user('hi')], new AbortController().signal)), (e: Error) => {

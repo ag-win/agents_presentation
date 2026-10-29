@@ -1,7 +1,7 @@
 import type { ChatMessage } from '../domain/ChatMessage.ts'
 import type { StreamEvent } from '../domain/StreamEvent.ts'
 import { UpstreamError } from '../errors/AppError.ts'
-import type { LlmProvider } from './LlmProvider.ts'
+import type { GenerationOptions, LlmProvider } from './LlmProvider.ts'
 import { NdjsonLineSplitter } from './NdjsonLineSplitter.ts'
 import { OllamaChunkMapper } from './OllamaChunkMapper.ts'
 
@@ -36,8 +36,8 @@ export class OllamaCloudProvider implements LlmProvider {
     this.fetchFn = options.fetch ?? ((url, init) => fetch(url, init))
   }
 
-  async *stream(messages: readonly ChatMessage[], signal: AbortSignal): AsyncIterable<StreamEvent> {
-    const response = await this.send(messages, signal)
+  async *stream(messages: readonly ChatMessage[], signal: AbortSignal, options: GenerationOptions = {}): AsyncIterable<StreamEvent> {
+    const response = await this.send(messages, signal, options)
     if (!response.ok) throw await this.describeFailure(response)
     if (!response.body) throw new UpstreamError('Ollama returned an empty response body')
 
@@ -55,13 +55,14 @@ export class OllamaCloudProvider implements LlmProvider {
     }
   }
 
-  private async send(messages: readonly ChatMessage[], signal: AbortSignal): Promise<Response> {
+  private async send(messages: readonly ChatMessage[], signal: AbortSignal, options: GenerationOptions): Promise<Response> {
     const body = {
       model: this.options.model,
       stream: true,
       think: false, // a plain answer, no reasoning phase
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
-      options: { temperature: this.options.temperature, num_predict: this.options.maxTokens },
+      options: { temperature: options.temperature ?? this.options.temperature, num_predict: options.maxTokens ?? this.options.maxTokens },
+      ...(options.jsonMode ? { format: 'json' } : {}),
     }
     try {
       return await this.fetchFn(`${this.options.baseUrl}/api/chat`, {

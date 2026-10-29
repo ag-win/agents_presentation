@@ -1,8 +1,14 @@
 import type { ChatMessage } from '../domain/ChatMessage.ts'
 import type { StreamEvent } from '../domain/StreamEvent.ts'
-import type { LlmProvider } from './LlmProvider.ts'
+import type { GenerationOptions, LlmProvider } from './LlmProvider.ts'
 
-/** Offline stand-in: streams canned text word by word. Lets the demo run with no key and no network. */
+const ISSUE_WORDS = /(broken|cracked|damaged|faulty|not working|stopped working|late|missing|wrong)/i
+
+/**
+ * Offline stand-in: streams canned text token by token. Lets the demos run with no key and no network.
+ * It plays along with the shop chain well enough to show the gate pass and fail: when asked for JSON it
+ * "extracts" an order number and problem from the conversation with simple patterns.
+ */
 export class MockProvider implements LlmProvider {
   readonly name = 'mock'
   readonly model = 'mock-model'
@@ -14,17 +20,40 @@ export class MockProvider implements LlmProvider {
     this.delayMs = delayMs
   }
 
-  async *stream(messages: readonly ChatMessage[], signal: AbortSignal): AsyncIterable<StreamEvent> {
+  async *stream(messages: readonly ChatMessage[], signal: AbortSignal, options: GenerationOptions = {}): AsyncIterable<StreamEvent> {
     const asked = [...messages].reverse().find((m) => m.role === 'user')?.content ?? ''
-    const reply =
-      `This is the offline mock model, so this is canned text. You asked: "${asked}". ` +
-      `Add OLLAMA_API_KEY to app/server/.env to get a real answer from Ollama Cloud.`
-    const tokens = reply.match(/\s*\S+/g) ?? []
+    const tokens = this.tokenize(this.reply(asked, options))
     for (const text of tokens) {
       if (signal.aborted) return
       await new Promise((resolve) => setTimeout(resolve, this.delayMs))
       yield { type: 'token', text }
     }
     yield { type: 'done', stats: { tokens: tokens.length, finishReason: 'stop' } }
+  }
+
+  private reply(asked: string, options: GenerationOptions): string {
+    if (options.jsonMode) return this.fakeExtraction(asked)
+    if (asked.startsWith('FACTS:')) {
+      return 'Sorry about the problem with your order. Items that arrive damaged can be refunded or replaced within 14 days. Please send a photo of the damage and we will sort it out.'
+    }
+    if (asked.startsWith('DRAFT:')) {
+      return "So sorry about that! We can refund or replace it, just send us a photo of the damage. (offline mock reply)"
+    }
+    return (
+      `This is the offline mock model, so this is canned text. You asked: "${asked}". ` +
+      'Add OLLAMA_API_KEY to app/server/.env to get a real answer from Ollama Cloud.'
+    )
+  }
+
+  private fakeExtraction(asked: string): string {
+    const text = asked.replace(/^CONVERSATION:\s*/, '')
+    const order = /\b(\d{3,10})\b/.exec(text)?.[1] ?? null
+    const issue = ISSUE_WORDS.exec(text)?.[1] ?? null
+    const request = /refund|money back/i.test(text) ? 'refund' : /replace/i.test(text) ? 'replacement' : null
+    return JSON.stringify({ orderNumber: order, product: null, issue, request })
+  }
+
+  private tokenize(text: string): string[] {
+    return text.match(/\s*\S+/g) ?? []
   }
 }
