@@ -32,16 +32,19 @@
 .demo-avatar { width: 44px; height: 44px; border-radius: 50%; background: #cfe9e4; color: #0b6b5d; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 17px; flex: none; }
 .demo-msgs {
   flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch;
-  padding: 14px 12px; display: flex; flex-direction: column; gap: 9px; scrollbar-width: thin;
+  padding: 14px 12px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin;
 }
 .demo-empty { margin: auto; color: #8a8f98; font-size: 19px; }
-.demo-bubble { max-width: 90%; padding: 10px 16px 11px; border-radius: 16px; background: #fff; line-height: 1.3; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12); overflow-wrap: anywhere; }
-.demo-bubble small { display: block; font-size: 19px; font-weight: 700; margin-bottom: 2px; }
-.demo-bubble--friend { background: var(--tint); border-left: 6px solid var(--who); }
+.demo-bubble { position: relative; max-width: 86%; padding: 8px 14px 9px; border-radius: 14px; background: #fff; line-height: 1.3; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15); overflow-wrap: anywhere; }
+.demo-bubble small { display: block; font-size: 19px; font-weight: 700; margin-bottom: 1px; }
+/* Others: white bubble, tail at the top-left. Me: green bubble, tail at the top-right (like WhatsApp). */
+.demo-bubble--friend, .demo-bubble--ai { align-self: flex-start; margin-left: 10px; border-top-left-radius: 0; }
+.demo-bubble--me { align-self: flex-end; margin-right: 10px; border-top-right-radius: 0; background: #d9fdd3; }
+.demo-bubble--friend::before, .demo-bubble--ai::before, .demo-bubble--me::before { content: ''; position: absolute; top: 0; width: 0; height: 0; border-bottom: 13px solid transparent; }
+.demo-bubble--friend::before, .demo-bubble--ai::before { left: -10px; border-right: 10px solid #fff; }
+.demo-bubble--me::before { right: -10px; border-left: 10px solid #d9fdd3; }
 .demo-bubble--friend small { color: var(--who); }
-.demo-bubble--me { align-self: flex-end; background: #d9fdd3; }
-.demo-bubble--ai { border: 2px solid #8b6cf0; }
-.demo-bubble--ai small { color: #5a3fd1; }
+.demo-bubble--ai small { color: #8b3dff; }
 .demo-mention { color: #5a3fd1; }
 .demo-sys { align-self: center; max-width: 92%; text-align: center; font-size: 18px; color: #667085; background: rgba(255, 255, 255, 0.7); border-radius: 10px; padding: 5px 12px; }
 .demo-typing { display: flex; align-items: center; gap: 6px; padding-bottom: 12px; }

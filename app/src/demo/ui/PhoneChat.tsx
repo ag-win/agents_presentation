@@ -14,8 +14,8 @@ function WithMentions({ text }: { text: string }) {
 
 function Bubble({ m }: { m: ChatMessage }) {
   if (m.author === 'system') return <div className="demo-sys">{m.text}</div>
-  // Friends get their own bright name colour and a matching pale bubble (via CSS variables).
-  const style = isFriend(m.author) ? ({ '--who': FRIENDS[m.author].color, '--tint': FRIENDS[m.author].tint } as CSSProperties) : undefined
+  // Friends get their own bright name colour (via a CSS variable); the bubble itself stays plain white.
+  const style = isFriend(m.author) ? ({ '--who': FRIENDS[m.author].color } as CSSProperties) : undefined
   return (
     <div className={`demo-bubble demo-bubble--${isFriend(m.author) ? 'friend' : m.author}`} style={style}>
       {m.author !== 'me' && <small>{m.author === 'ai' ? '✦ AI' : displayName(m.author)}</small>}
