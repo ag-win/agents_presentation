@@ -22,6 +22,7 @@ import * as s16 from './slides/s16-three-tiers'
 import * as s17 from './slides/s17-augmented-llm'
 import * as s18 from './slides/s18-div-design'
 import * as s19 from './slides/s19-prompt-chaining'
+import * as s19b from './slides/s19b-system-prompt'
 import * as s20 from './slides/s20-routing'
 import * as s21 from './slides/s21-parallelization'
 import * as s22 from './slides/s22-orchestrator-workers'
@@ -69,6 +70,7 @@ export const slides: SlideDef[] = [
   def(s17),
   def(s18),
   def(s19),
+  def(s19b),
   def(s20),
   def(s21),
   def(s22),

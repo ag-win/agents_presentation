@@ -256,3 +256,23 @@ export function ThreePatterns() {
     </Diagram>
   )
 }
+
+/** The system prompt joins the user's prompt before it reaches the LLM. */
+export function SystemPromptFlow() {
+  return (
+    <Diagram w={1000} h={360} label="The user's prompt and a hidden system prompt are combined before they reach the LLM">
+      <Node x={430} y={72} w={270} h={84} kind="logic" lines={['System prompt', 'set by the app']} size={26} />
+      <Node x={110} y={262} w={190} h={78} kind="io" lines={['User prompt', 'typed by you']} size={24} />
+      <circle cx={430} cy={262} r={30} fill="var(--card)" stroke="var(--dg-edge)" strokeWidth={3} />
+      <text x={430} y={273} textAnchor="middle" fontSize={34} fontWeight={700} fill="var(--ink)">+</text>
+      <Node x={690} y={262} w={160} h={90} kind="llm" lines="LLM" size={30} />
+      <Node x={905} y={262} w={150} h={78} kind="io" lines="Answer" size={26} />
+
+      <Edge d={line(430, 114, 430, 230)} />
+      <Label x={600} y={170} lines="added before the LLM sees it" size={22} />
+      <Edge d={line(205, 262, 396, 262)} />
+      <Edge d={line(464, 262, 608, 262)} />
+      <Edge d={line(772, 262, 828, 262)} />
+    </Diagram>
+  )
+}
