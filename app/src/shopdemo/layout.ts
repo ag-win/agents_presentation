@@ -16,19 +16,19 @@ export interface Lane {
 
 /** Fixed geometry of the pipeline panel (px). Boxes are absolutely placed so lanes and dots line up exactly. */
 export class PipelineLayout {
-  static readonly width = 820
-  static readonly height = 908
+  static readonly width = 960
+  static readonly height = 938
 
   static readonly boxes: Readonly<Record<NodeId, Box>> = {
-    input: { x: 110, y: 0, w: 600, h: 96 },
-    extract: { x: 110, y: 136, w: 600, h: 120 },
-    gate: { x: 110, y: 296, w: 600, h: 112 },
-    draft: { x: 110, y: 448, w: 600, h: 120 },
-    polish: { x: 110, y: 608, w: 600, h: 120 },
-    output: { x: 110, y: 768, w: 600, h: 140 },
+    input: { x: 100, y: 0, w: 760, h: 112 },
+    extract: { x: 100, y: 142, w: 760, h: 132 },
+    gate: { x: 100, y: 304, w: 760, h: 124 },
+    draft: { x: 100, y: 458, w: 760, h: 132 },
+    polish: { x: 100, y: 620, w: 760, h: 132 },
+    output: { x: 100, y: 782, w: 760, h: 156 },
   }
 
-  private static readonly cx = 410
+  private static readonly cx = 480
 
   private static down(from: NodeId, to: NodeId): string {
     const a = PipelineLayout.boxes[from]
@@ -39,7 +39,7 @@ export class PipelineLayout {
   static readonly lanes: readonly Lane[] = (() => {
     const gate = PipelineLayout.boxes.gate
     const out = PipelineLayout.boxes.output
-    const bypassX = 764
+    const bypassX = 884
     return [
       { id: 'in-extract', d: PipelineLayout.down('input', 'extract'), dashed: false },
       { id: 'extract-gate', d: PipelineLayout.down('extract', 'gate'), dashed: false },

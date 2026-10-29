@@ -74,8 +74,8 @@ export function ChainPipeline({ nodes, dots, runStart }: { nodes: Readonly<Recor
     <section className="chain" style={{ width: PipelineLayout.width, height: PipelineLayout.height }} aria-label="What happens behind the phone">
       <svg className="chain__lanes" width={PipelineLayout.width} height={PipelineLayout.height} aria-hidden>
         {PipelineLayout.lanes.map((l) => <path key={l.id} d={l.d} className={`chain-lane${l.dashed ? ' is-dashed' : ''}`} />)}
-        <text x={424} y={433}>Pass</text>
-        <text x={776} y={600}>Fail</text>
+        <text x={498} y={451}>Pass</text>
+        <text x={898} y={620}>Fail</text>
       </svg>
       {ORDER.map((id) => <Box key={id} id={id} node={nodes[id]} runStart={runStart} />)}
       {dots.map((d) => <Dot key={d.id} dot={d} />)}

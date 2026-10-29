@@ -27,7 +27,7 @@ export function ShopDemoOverlay({ onClose }: { onClose: () => void }) {
   }, [onClose])
 
   return (
-    <div className="demo-overlay" role="dialog" aria-modal="true" aria-label="Prompt chaining demo" data-modal>
+    <div className="demo-overlay demo-overlay--large" role="dialog" aria-modal="true" aria-label="Prompt chaining demo" data-modal>
       <header className="demo-head">
         <h2>Prompt chaining, live</h2>
         <span className={`demo-status${status.warn ? ' is-warn' : ''}`}>{status.text}</span>
@@ -36,7 +36,7 @@ export function ShopDemoOverlay({ onClose }: { onClose: () => void }) {
         <button className="demo-btn demo-btn--icon" onClick={onClose} aria-label="Close">×</button>
       </header>
 
-      <div className="demo-body">
+      <div className="demo-body shop-body">
         <div className="demo-left">
           <ShopPhone snap={snap} />
           <p className="shop-caption">Tap the assistant button in the corner of the phone</p>

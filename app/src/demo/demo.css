@@ -1,4 +1,7 @@
-/* Phone demo overlay. Authored for the 1920x1080 slide stage. */
+/* Phone demo overlay. Authored for the 1920x1080 slide stage.
+   Projector legibility: add the `demo-overlay--large` class to an overlay to bump the shared chrome (title, buttons,
+   status text) to the larger scale below. New demos should use it and size their own text from the same scale. */
+.demo-overlay--large { --demo-fs-title: 42px; --demo-fs-ui: 28px; --demo-fs-small: 25px; --demo-fs-label: 21px; }
 .demo-overlay {
   position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; padding: 26px 56px 30px;
   /* Frosted glass: the slide behind stays visible but blurred. Tweak the two numbers to taste. */
@@ -6,16 +9,16 @@
   color: var(--ink); font-family: var(--font-sans); font-size: 24px;
 }
 .demo-head { display: flex; align-items: center; gap: 22px; height: 64px; flex: none; padding-right: 170px; }
-.demo-head h2 { margin: 0; flex: 1; font-size: 36px; font-weight: 700; }
+.demo-head h2 { margin: 0; flex: 1; font-size: var(--demo-fs-title, 36px); font-weight: 700; }
 .demo-slow { display: flex; align-items: center; gap: 18px; }
 .demo-btn {
   border: 2px solid rgba(20, 22, 28, 0.55); background: rgba(255, 255, 255, 0.35); color: var(--ink); border-radius: 999px;
-  padding: 9px 24px; font-size: 24px; font-weight: 700; transition: background 0.15s, border-color 0.15s;
+  padding: 9px 24px; font-size: var(--demo-fs-ui, 24px); font-weight: 700; transition: background 0.15s, border-color 0.15s;
 }
 .demo-btn:hover { background: rgba(255, 255, 255, 0.75); }
 .demo-btn.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
 .demo-btn--icon { width: 48px; height: 48px; padding: 0; font-size: 34px; line-height: 1; }
-.demo-slider { display: flex; align-items: center; gap: 14px; font-size: 22px; min-width: 330px; }
+.demo-slider { display: flex; align-items: center; gap: 14px; font-size: var(--demo-fs-small, 22px); min-width: 330px; }
 .demo-slider input { width: 190px; accent-color: #f59e0b; }
 
 .demo-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 470px 1fr; gap: 64px; padding-top: 14px; }
