@@ -70,7 +70,7 @@ export class MockProvider implements LlmProvider {
   }
 
   private fakePartLabel(text: string): string {
-    if (/(cracked|broken|damaged|faulty|stopped working|split|refund|replacement)/i.test(text)) return 'complaint'
+    if (/(cracked|broken|damaged|faulty|stopped working|split|refund|replacement|never received|missing)/i.test(text)) return 'complaint'
     if (/(where is|order \d|not arrived|hasn't arrived|tracking|package|delivery status|\blate\b)/i.test(text)) return 'order'
     if (/(does the|how long does the battery|which is better|reviews?|spec|waterproof|any good)/i.test(text)) return 'product'
     if (/(thanks|thank you|great service|love|please fix|suggest)/i.test(text)) return 'feedback'
