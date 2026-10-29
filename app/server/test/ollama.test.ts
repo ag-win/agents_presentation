@@ -71,6 +71,8 @@ describe('OllamaCloudProvider', () => {
   it('maps usage-limit and unknown-model responses to helpful messages', async () => {
     const limited = provider(async () => new Response('', { status: 429 }))
     await assert.rejects(collect(limited.stream([ChatMessage.user('x')], new AbortController().signal)), /usage limit/)
+    const unpaid = provider(async () => new Response('', { status: 402 }))
+    await assert.rejects(collect(unpaid.stream([ChatMessage.user('x')], new AbortController().signal)), /not included in your plan/)
     const missing = provider(async () => new Response('', { status: 404 }))
     await assert.rejects(collect(missing.stream([ChatMessage.user('x')], new AbortController().signal)), /gemma4:31b/)
   })

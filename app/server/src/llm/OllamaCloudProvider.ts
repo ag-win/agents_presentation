@@ -84,8 +84,10 @@ export class OllamaCloudProvider implements LlmProvider {
         return new UpstreamError('Ollama Cloud rejected the API key. Check OLLAMA_API_KEY in app/server/.env.')
       case 404:
         return new UpstreamError(`Ollama Cloud does not know the model "${this.model}". Check OLLAMA_MODEL.`)
+      case 402:
+        return new UpstreamError(`Ollama Cloud says "${this.model}" is not included in your plan. Add usage credits or choose another OLLAMA_MODEL.`)
       case 429:
-        return new UpstreamError('Ollama Cloud usage limit reached. Try again later or check ollama.com/settings/usage.')
+        return new UpstreamError('Ollama Cloud usage limit reached. Add credits or upgrade at ollama.com/settings, or wait for the limit to reset.')
       default:
         return new UpstreamError(`Ollama Cloud returned HTTP ${response.status}${detail ? `: ${detail}` : ''}`)
     }
