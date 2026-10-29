@@ -3,6 +3,7 @@ import { demoSession } from '../demoSession'
 import { useDemo } from '../useDemo'
 import { PhoneChat } from './PhoneChat'
 import { PipelinePanel } from './PipelinePanel'
+import { BackupControl } from './BackupControl'
 import { SlowmoControl } from './SlowmoControl'
 import '../demo.css'
 
@@ -27,6 +28,7 @@ export function PhoneDemoOverlay({ onClose }: { onClose: () => void }) {
     <div className="demo-overlay" role="dialog" aria-modal="true" aria-label="Single LLM call demo" data-modal>
       <header className="demo-head">
         <h2>One prompt, one LLM call</h2>
+        <BackupControl onChanged={() => void demoSession.refreshBackend()} />
         <SlowmoControl slowmo={slowmo} onChange={(next) => demoSession.setSlowmo(next)} />
         <button className="demo-btn" onClick={() => demoSession.reset()}>Reset</button>
         <button className="demo-btn demo-btn--icon" onClick={onClose} aria-label="Close">×</button>

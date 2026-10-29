@@ -143,7 +143,7 @@ export class ShopDemoSession {
       finished: (error: string | null) => {
         this.abort = null
         this.update({ busy: false })
-        if (error) this.addMessage('system', `Could not get an answer: ${error}`)
+        if (error) this.addMessage('system', `Could not get an answer: ${error} (Tip: try the Backup button.)`)
       },
     }
   }

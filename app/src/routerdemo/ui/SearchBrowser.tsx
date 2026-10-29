@@ -15,7 +15,7 @@ function AnswerCard({ snap }: { snap: RouterSnapshot }) {
     <section className="rb-answer">
       <h4><span className="rb-spark">✦</span> ANSWER{answer.label ? <> · <b>{answer.label}</b> assistant</> : busy ? ' · choosing an assistant…' : ''}</h4>
       {answer.text ? <p>{answer.text}</p> : busy ? <p className="rb-typing"><i /><i /><i /></p> : null}
-      {answer.error && <p className="rb-error">Could not get an answer: {answer.error}</p>}
+      {answer.error && <p className="rb-error">Could not get an answer: {answer.error} (Tip: try the Backup button.)</p>}
     </section>
   )
 }

@@ -183,7 +183,7 @@ export class PhoneDemoSession {
     // Keep the textbox locked across the pause before the friends reply, so it doesn't flicker open.
     this.update({ busy: false, scriptPlaying: continueScript })
     if (error) {
-      this.addMessage('system', `Could not get an answer: ${error}`)
+      this.addMessage('system', `Could not get an answer: ${error} (Tip: try the Backup button.)`)
       return
     }
     if (continueScript) this.scheduler.after(900, () => this.playLines(this.script.after))

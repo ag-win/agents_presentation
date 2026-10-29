@@ -7,6 +7,7 @@ import { useSystemPrompt } from '../systemPrompt/useSystemPrompt'
 import { useDemo } from '../useDemo'
 import { PhoneChat } from './PhoneChat'
 import { PipelinePanel, backendLine } from './PipelinePanel'
+import { BackupControl } from './BackupControl'
 import { SlowmoControl } from './SlowmoControl'
 import { SystemPromptBox } from './SystemPromptBox'
 
@@ -39,6 +40,7 @@ export function SystemPromptOverlay({ onClose }: { onClose: () => void }) {
       <header className="demo-head">
         <h2>The system prompt, live</h2>
         <span className={`demo-status${status.warn ? ' is-warn' : ''}`}>{status.text}</span>
+        <BackupControl onChanged={() => void session.refreshBackend()} />
         <SlowmoControl slowmo={snap.slowmo} onChange={(next) => session.setSlowmo(next)} />
         <button className="demo-btn" onClick={reset}>Reset</button>
         <button className="demo-btn demo-btn--icon" onClick={onClose} aria-label="Close">×</button>

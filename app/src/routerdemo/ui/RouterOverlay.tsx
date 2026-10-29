@@ -3,7 +3,9 @@ import '../../demo/demo.css'
 import '../../demo/systemPrompt/system.css'
 import '../router.css'
 import { backendLine } from '../../demo/ui/PipelinePanel'
+import { BackupControl } from '../../demo/ui/BackupControl'
 import { SlowmoControl } from '../../demo/ui/SlowmoControl'
+import { useProviders } from '../../demo/providers/useProviders'
 import { routerPrompts } from '../promptStore'
 import { RouterLayout } from '../RouterLayout'
 import { routerSession } from '../sharedSession'
@@ -23,7 +25,10 @@ export function RouterOverlay({ onClose }: { onClose: () => void }) {
   const status = backendLine(snap.backend)
   const specialistIds = prompts.defaults?.specialists.map((s) => s.id) ?? []
   const layout = useMemo(() => new RouterLayout(specialistIds), [specialistIds.join(',')]) // eslint-disable-line react-hooks/exhaustive-deps
-  const searchLabel = prompts.defaults ? (prompts.defaults.search.live ? 'search: Brave' : 'search: mock results') : ''
+  const { data: providerData } = useProviders()
+  const activeSearch = providerData?.search.options.find((o) => o.id === providerData.search.active)
+  const searchLabel = activeSearch ? `search: ${activeSearch.label}` : ''
+  const onBackupSearch = providerData ? providerData.search.active !== providerData.search.options[0].id : false
 
   useEffect(() => {
     void routerSession.refreshBackend()
@@ -39,9 +44,10 @@ export function RouterOverlay({ onClose }: { onClose: () => void }) {
     <div className="demo-overlay demo-overlay--large" role="dialog" aria-modal="true" aria-label="Routing demo" data-modal>
       <header className="demo-head">
         <h2>Routing, live</h2>
-        <span className={`demo-status${status.warn || (prompts.defaults && !prompts.defaults.search.live) ? ' is-warn' : ''}`}>
+        <span className={`demo-status${status.warn || onBackupSearch ? ' is-warn' : ''}`}>
           {status.text}{searchLabel ? ` · ${searchLabel}` : ''}
         </span>
+        <BackupControl showSearch onChanged={() => void routerSession.refreshBackend()} />
         <SlowmoControl slowmo={snap.slowmo} onChange={(next) => routerSession.setSlowmo(next)} />
         <button className="demo-btn" onClick={() => routerSession.reset()}>Reset</button>
         <button className="demo-btn demo-btn--icon" onClick={onClose} aria-label="Close">×</button>

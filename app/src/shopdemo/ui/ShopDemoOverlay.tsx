@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { backendLine } from '../../demo/ui/PipelinePanel'
+import { BackupControl } from '../../demo/ui/BackupControl'
 import { SlowmoControl } from '../../demo/ui/SlowmoControl'
 import '../../demo/demo.css'
 import '../shop.css'
@@ -31,6 +32,7 @@ export function ShopDemoOverlay({ onClose }: { onClose: () => void }) {
       <header className="demo-head">
         <h2>Prompt chaining, live</h2>
         <span className={`demo-status${status.warn ? ' is-warn' : ''}`}>{status.text}</span>
+        <BackupControl onChanged={() => void shopSession.refreshBackend()} />
         <SlowmoControl slowmo={snap.slowmo} onChange={(next) => shopSession.setSlowmo(next)} />
         <button className="demo-btn" onClick={() => shopSession.reset()}>Reset</button>
         <button className="demo-btn demo-btn--icon" onClick={onClose} aria-label="Close">×</button>
