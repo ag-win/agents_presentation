@@ -10,6 +10,8 @@ export interface RunHost {
   patchPipeline(patch: Partial<PipelineState>): void
   launchDot(kind: DotKind, lane: Lane, durationMs: number): number
   removeDot(id: number): void
+  /** The system prompt has joined this prompt dot. */
+  mergeDot(id: number): void
   /** A token's dot reached the Output box: show its text. */
   tokenLanded(text: string): void
   finished(error: string | null): void
@@ -66,17 +68,27 @@ export class PromptRun {
 
   private sendPromptDot(): void {
     this.host.patchPipeline({ inputGlow: false })
-    const id = this.host.launchDot('prompt', 'in', this.timings.promptTravelMs)
-    // The system prompt rides in from the side and joins the prompt just before the LLM.
-    const systemDot = this.systemSource ? this.host.launchDot('system', 'sys', this.timings.promptTravelMs) : null
-    this.scheduler.after(this.timings.promptTravelMs, () => {
+    const travel = this.timings.promptTravelMs
+    const id = this.host.launchDot('prompt', 'in', travel)
+
+    // The system prompt does not go to the LLM directly: it runs to the Input -> LLM line and joins the prompt
+    // half-way along it, timed to meet the prompt dot there. It is read (and then locked) at that moment, and
+    // the real request is made when the combined prompt reaches the LLM.
+    let system: string | undefined
+    if (this.systemSource) {
+      const source = this.systemSource
+      const systemDot = this.host.launchDot('system', 'sys', travel / 2)
+      this.scheduler.after(travel / 2, () => {
+        this.host.removeDot(systemDot)
+        this.host.mergeDot(id)
+        system = source.current()
+        source.lock()
+      })
+    }
+
+    this.scheduler.after(travel, () => {
       this.host.removeDot(id)
-      if (systemDot !== null) this.host.removeDot(systemDot)
-      if (this.systemSource) {
-        const system = this.systemSource.current()
-        this.systemSource.lock()
-        void this.consume(system)
-      }
+      if (this.systemSource) void this.consume(system)
       this.host.patchPipeline({ llmGlow: true })
       this.emitting = true
       this.tick()

@@ -14,7 +14,7 @@ export type Mode = 'idle' | 'planned' | 'free'
 
 /** prompt = the user's message (big dot); token = one streamed token (small dot); system = the system prompt joining the prompt. */
 export type DotKind = 'prompt' | 'token' | 'system'
-/** 'in' runs from the Input box to the LLM, 'out' from the LLM to the Output box, 'sys' from the system-prompt box to the LLM. */
+/** 'in' runs from the Input box to the LLM, 'out' from the LLM to the Output box, 'sys' from the system-prompt box to the 'in' line. */
 export type Lane = 'in' | 'out' | 'sys'
 
 /** One glowing dot on a dotted line. Position is derived from startedAt/duration, so it survives re-renders. */
@@ -25,6 +25,8 @@ export interface FlightDot {
   readonly startedAt: number
   readonly durationMs: number
   readonly offsetPx: number
+  /** The system prompt has joined this prompt dot (it is drawn with a purple ring from then on). */
+  readonly merged?: boolean
 }
 
 export interface PipelineState {

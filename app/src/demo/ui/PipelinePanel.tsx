@@ -6,21 +6,31 @@ function Dot({ dot }: { dot: FlightDot }) {
   const [elapsed] = useState(() => Math.max(0, performance.now() - dot.startedAt))
   return (
     <span
-      className={`demo-dot demo-dot--${dot.kind}`}
+      className={`demo-dot demo-dot--${dot.kind}${dot.merged ? ' demo-dot--merged' : ''}`}
       style={{ left: `calc(50% + ${dot.offsetPx}px)`, animationDuration: `${dot.durationMs}ms`, animationDelay: `-${elapsed}ms` }}
     />
   )
 }
 
-function DottedLane({ lane, dots }: { lane: Lane; dots: readonly FlightDot[] }) {
+/** Something drawn to the left of a lane and joined to the lane's line by a dotted connector. */
+interface LaneAside {
+  content: ReactNode
+  dots: readonly FlightDot[]
+}
+
+function DottedLane({ lane, dots, aside }: { lane: Lane; dots: readonly FlightDot[]; aside?: LaneAside }) {
   return (
-    <div className="demo-lane" aria-hidden>
-      {dots.filter((d) => d.lane === lane).map((d) => <Dot key={d.id} dot={d} />)}
+    <div className="demo-lane">
+      <div className="demo-lane__dots" aria-hidden>
+        {dots.filter((d) => d.lane === lane).map((d) => <Dot key={d.id} dot={d} />)}
+        {aside && <div className="demo-conn">{aside.dots.filter((d) => d.lane === 'sys').map((d) => <ConnectorDot key={d.id} dot={d} />)}</div>}
+      </div>
+      {aside && <div className="demo-aside">{aside.content}</div>}
     </div>
   )
 }
 
-/** The system prompt joining the prompt on its way into the LLM, drawn along the short connector. */
+/** The system prompt running along the connector to the Input -> LLM line. */
 function ConnectorDot({ dot }: { dot: FlightDot }) {
   const [elapsed] = useState(() => Math.max(0, performance.now() - dot.startedAt))
   return <span className="demo-dot demo-dot--system demo-dot--x" style={{ animationDuration: `${dot.durationMs}ms`, animationDelay: `-${elapsed}ms` }} />
@@ -33,29 +43,21 @@ interface BoxProps {
   pulse?: number
   /** Extra controls on the label row (e.g. a dropdown arrow). */
   head?: ReactNode
-  /** Something drawn to the left of the box and joined to it by a dotted connector. */
-  aside?: { content: ReactNode; dots: readonly FlightDot[] }
   children: ReactNode
 }
 
 /** io = coral pill (Input/Output), llm = green rectangle: the same shapes and colours as the augmented-LLM diagram. */
-function Box({ kind, label, glow, pulse, head, aside, children }: BoxProps) {
+function Box({ kind, label, glow, pulse, head, children }: BoxProps) {
   return (
     <div className={`demo-box demo-box--${kind}${glow ? ' is-glowing' : ''}`}>
       {pulse ? <span key={pulse} className="demo-pulse" /> : null}
-      {aside && (
-        <>
-          <div className="demo-conn" aria-hidden>{aside.dots.filter((d) => d.lane === 'sys').map((d) => <ConnectorDot key={d.id} dot={d} />)}</div>
-          <div className="demo-aside">{aside.content}</div>
-        </>
-      )}
       {head ? <div className="demo-box__head"><h3>{label}</h3>{head}</div> : <h3>{label}</h3>}
       {children}
     </div>
   )
 }
 
-/** Optional additions for the LLM box: a dropdown that reveals the system prompt, and a box beside it. */
+/** Optional additions: a dropdown on the LLM box that reveals the system prompt, and a side box that feeds the Input -> LLM line. */
 export interface LlmExtras {
   systemText: string
   expanded: boolean
@@ -87,14 +89,8 @@ export function PipelinePanel({ snap, llm, className = '' }: { snap: DemoSnapsho
       <Box kind="io" label="INPUT" glow={p.inputGlow}>
         <p className={`demo-box__text${p.inputText ? '' : ' is-empty'}`}>{p.inputText || 'Waiting for a prompt…'}</p>
       </Box>
-      <DottedLane lane="in" dots={snap.dots} />
-      <Box
-        kind="llm"
-        label="LLM"
-        glow={p.llmGlow}
-        head={llm && <Chevron expanded={llm.expanded} onToggle={llm.onToggle} />}
-        aside={llm && { content: llm.aside, dots: snap.dots }}
-      >
+      <DottedLane lane="in" dots={snap.dots} aside={llm && { content: llm.aside, dots: snap.dots }} />
+      <Box kind="llm" label="LLM" glow={p.llmGlow} head={llm && <Chevron expanded={llm.expanded} onToggle={llm.onToggle} />}>
         <p className="demo-box__text">Large language model</p>
         <p className={`demo-box__meta${backend.warn ? ' is-warn' : ''}`}>{backend.text}</p>
         <p className="demo-box__meta">tokens sent: {p.llmTokens}</p>

@@ -159,6 +159,7 @@ export class PhoneDemoSession {
         return id
       },
       removeDot: (id: number) => this.update({ dots: this.snapshot.dots.filter((d) => d.id !== id) }),
+      mergeDot: (id: number) => this.update({ dots: this.snapshot.dots.map((d) => (d.id === id ? { ...d, merged: true } : d)) }),
       tokenLanded: (text: string) => this.landToken(text),
       finished: (error: string | null) => this.finishRun(error),
     }

@@ -3,7 +3,7 @@
 
 .demo-body--sys { grid-template-columns: 470px 1fr; }
 .demo-body--sys .demo-right { justify-content: flex-end; }
-.demo-pipe--sys { width: 780px; --lane-h: 64px; --conn-w: 76px; flex: none; }
+.demo-pipe--sys { width: 780px; --lane-h: 64px; --conn-w: 76px; --conn-len: 466px; /* = half the pipe + --conn-w */ flex: none; }
 
 /* dropdown arrow on the LLM box */
 .demo-box__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
@@ -22,14 +22,17 @@
 .demo-sysblock p { margin: 0; font-size: 24px; line-height: 1.3; color: var(--dg-logic-ink); font-weight: 700; overflow-wrap: anywhere; }
 .demo-sysblock p.is-empty { opacity: 0.6; font-weight: 400; }
 
-/* connector from the system-prompt box to the LLM box, with the purple "system prompt" dot */
-.demo-conn { position: absolute; right: 100%; top: 50%; width: var(--conn-w); border-top: 5px dotted #7a6fc9; }
+/* connector from the system-prompt box to the Input -> LLM line, with the purple "system prompt" dot */
+.demo-conn { position: absolute; right: 50%; top: 50%; width: var(--conn-len); border-top: 5px dotted #7a6fc9; }
 .demo-dot--system { background: radial-gradient(circle, #fff 0%, #d8d2ff 35%, #7c3aed 100%); width: 34px; height: 34px; box-shadow: 0 0 22px 8px rgba(124, 58, 237, 0.7); }
 .demo-dot--x { top: 0; left: 0; margin: -17px 0 0 -17px; animation-name: demo-slide-x; }
-@keyframes demo-slide-x { from { transform: translateX(0); } to { transform: translateX(var(--conn-w)); } }
+@keyframes demo-slide-x { from { transform: translateX(0); } to { transform: translateX(var(--conn-len)); } }
+/* once the system prompt has joined the prompt, the big dot carries a purple ring */
+.demo-dot--merged { box-shadow: 0 0 0 9px rgba(124, 58, 237, 0.85), 0 0 26px 10px rgba(245, 158, 11, 0.85); }
 
 /* the box between the phone and the LLM */
-.demo-aside { position: absolute; right: calc(100% + var(--conn-w)); top: 50%; transform: translateY(-50%); z-index: 4; }
+/* hangs below the line's midpoint so its title row meets the connector; the editor grows downward from there */
+.demo-aside { position: absolute; right: calc(100% + var(--conn-w)); top: calc(50% - 56px); z-index: 4; }
 .sysbox { width: 400px; border: 3px dashed rgba(20, 22, 28, 0.3); border-radius: 18px; background: transparent; color: rgba(20, 22, 28, 0.55); transition: background 0.2s, border-color 0.2s, color 0.2s; }
 .sysbox:hover { border-color: rgba(20, 22, 28, 0.5); color: rgba(20, 22, 28, 0.75); }
 .sysbox.is-open { background: rgba(255, 255, 255, 0.78); border-style: solid; border-color: rgba(124, 58, 237, 0.55); color: var(--ink); box-shadow: 0 10px 34px rgba(20, 22, 28, 0.18); }
