@@ -3,6 +3,7 @@ import { PromptComposer } from './application/PromptComposer.ts'
 import { ProviderSwitchService } from './application/ProviderSwitchService.ts'
 import { RoutingService } from './application/RoutingService.ts'
 import { SingleCallService } from './application/SingleCallService.ts'
+import { SupportService } from './application/SupportService.ts'
 import { SupportChainFactory } from './chain/SupportChainFactory.ts'
 import { AppConfig } from './config/AppConfig.ts'
 import { HttpServer } from './http/HttpServer.ts'
@@ -12,11 +13,21 @@ import { ProvidersSelectRoute, ProvidersStateRoute } from './http/routes/Provide
 import { RouteDefaultsRoute } from './http/routes/RouteDefaultsRoute.ts'
 import { RouteStreamRoute } from './http/routes/RouteStreamRoute.ts'
 import { StreamRoute } from './http/routes/StreamRoute.ts'
+import { SupportDefaultsRoute } from './http/routes/SupportDefaultsRoute.ts'
+import { SupportStreamRoute } from './http/routes/SupportStreamRoute.ts'
 import { ProviderFactory } from './llm/ProviderFactory.ts'
 import { SwitchableLlmProvider } from './llm/SwitchableLlmProvider.ts'
 import { RoutingPipeline } from './routing/RoutingPipeline.ts'
 import { SpecialistCatalog } from './routing/SpecialistCatalog.ts'
 import { SearchContextFormatter } from './search/SearchContextFormatter.ts'
+import { OrderDatabase } from './shop/OrderDatabase.ts'
+import { ProductCatalog } from './shop/ProductCatalog.ts'
+import { ScenarioCatalog } from './support/ScenarioCatalog.ts'
+import { SupportPipeline } from './support/SupportPipeline.ts'
+import { SupportPromptCatalog } from './support/SupportPromptCatalog.ts'
+import { OrderStatusTool } from './tools/OrderStatusTool.ts'
+import { ToolLoop } from './tools/ToolLoop.ts'
+import { ToolRegistry } from './tools/ToolRegistry.ts'
 import { SwitchableSearchProvider } from './search/SwitchableSearchProvider.ts'
 import { SearchProviderFactory } from './search/SearchProviderFactory.ts'
 import { ConsoleLogger } from './logging/Logger.ts'
@@ -37,6 +48,11 @@ async function main(): Promise<void> {
   const catalog = SpecialistCatalog.standard()
   const switcher = new ProviderSwitchService(llmRegistry, searchRegistry)
   const routingService = new RoutingService(new RoutingPipeline(provider, search, catalog, new SearchContextFormatter()), provider, search, catalog)
+  const orders = new OrderDatabase()
+  const tools = new ToolRegistry([new OrderStatusTool(orders)])
+  const supportPrompts = SupportPromptCatalog.standard()
+  const supportPipeline = new SupportPipeline({ provider, prompts: supportPrompts, orders, products: new ProductCatalog(), toolLoop: new ToolLoop(provider, tools) })
+  const supportService = new SupportService(supportPipeline, provider, supportPrompts, new ScenarioCatalog(), tools, orders)
   const server = new HttpServer(
     config.host,
     config.port,
@@ -48,6 +64,8 @@ async function main(): Promise<void> {
       new ProvidersStateRoute(switcher),
       new ProvidersSelectRoute(switcher),
       new RouteStreamRoute(routingService, { maxQuery: 300, maxSystem: 1500 }, logger),
+      new SupportDefaultsRoute(supportService),
+      new SupportStreamRoute(supportService, { maxMessage: 600, maxSystem: 2500 }, logger),
     ],
     logger,
   )
