@@ -30,8 +30,6 @@ import * as s23 from './slides/s23-evaluator-optimizer'
 import * as s24 from './slides/s24-blend'
 import * as s25 from './slides/s25-support-nested'
 import * as s26 from './slides/s26-three-patterns'
-import * as s27 from './slides/s27-demo-single'
-import * as s28 from './slides/s28-demo-workflow'
 import * as s29 from './slides/s29-agent-loop'
 import * as s30 from './slides/s30-demo-agent'
 import * as s31 from './slides/s31-div-evidence'
@@ -78,8 +76,6 @@ export const slides: SlideDef[] = [
   def(s24),
   def(s25),
   def(s26),
-  def(s27),
-  def(s28),
   def(s29),
   def(s30),
   def(s31),
