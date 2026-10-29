@@ -1,0 +1,52 @@
+export type ProviderChoice = 'auto' | 'mock'
+
+/** All settings in one immutable object, read once from the environment at startup. */
+export class AppConfig {
+  readonly host: string
+  readonly port: number
+  readonly provider: ProviderChoice
+  readonly ollamaApiKey: string | undefined
+  readonly ollamaBaseUrl: string
+  readonly ollamaModel: string
+  readonly temperature: number
+  readonly maxTokens: number
+  readonly maxPromptChars: number
+
+  private constructor(values: {
+    host: string
+    port: number
+    provider: ProviderChoice
+    ollamaApiKey: string | undefined
+    ollamaBaseUrl: string
+    ollamaModel: string
+    temperature: number
+    maxTokens: number
+    maxPromptChars: number
+  }) {
+    this.host = values.host
+    this.port = values.port
+    this.provider = values.provider
+    this.ollamaApiKey = values.ollamaApiKey
+    this.ollamaBaseUrl = values.ollamaBaseUrl
+    this.ollamaModel = values.ollamaModel
+    this.temperature = values.temperature
+    this.maxTokens = values.maxTokens
+    this.maxPromptChars = values.maxPromptChars
+  }
+
+  static fromEnv(env: NodeJS.ProcessEnv): AppConfig {
+    const key = env.OLLAMA_API_KEY?.trim()
+    return new AppConfig({
+      // Localhost only: the browser reaches us through the Vite proxy, so the API key never leaves this machine.
+      host: env.HOST?.trim() || '127.0.0.1',
+      port: Number(env.PORT) || 8787,
+      provider: env.LLM_PROVIDER === 'mock' ? 'mock' : 'auto',
+      ollamaApiKey: key ? key : undefined,
+      ollamaBaseUrl: (env.OLLAMA_BASE_URL?.trim() || 'https://ollama.com').replace(/\/+$/, ''),
+      ollamaModel: env.OLLAMA_MODEL?.trim() || 'gemma4:31b',
+      temperature: 0.7,
+      maxTokens: 300,
+      maxPromptChars: 2000,
+    })
+  }
+}
