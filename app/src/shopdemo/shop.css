@@ -1,0 +1,104 @@
+/* Shop phone + chain pipeline for the prompt-chaining demo. Authored for the 1920x1080 slide stage. */
+
+/* ---------- phone: the shop ---------- */
+.shop-screen { position: relative; background: #fff; font-size: 22px; }
+.shop-page { height: 100%; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch; scrollbar-width: none; background: #f5f6f8; }
+.shop-page::-webkit-scrollbar { display: none; }
+.shop-topbar { position: sticky; top: 0; z-index: 2; background: #2563eb; color: #fff; padding: 34px 18px 12px; display: flex; align-items: center; justify-content: space-between; }
+.shop-topbar b { font-size: 30px; letter-spacing: -0.01em; }
+.shop-cart { position: relative; display: inline-flex; }
+.shop-cart i { position: absolute; top: -6px; right: -8px; min-width: 20px; height: 20px; border-radius: 10px; background: #f59e0b; color: #1f2430; font-size: 13px; font-style: normal; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.shop-search { margin: 12px 14px 0; background: #fff; border-radius: 12px; padding: 11px 16px; color: #8a8f98; font-size: 19px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); }
+.shop-chips { display: flex; gap: 8px; padding: 12px 14px 4px; overflow: hidden; }
+.shop-chips span { flex: none; background: #fff; border: 1px solid #d8dce3; border-radius: 999px; padding: 6px 16px; font-size: 18px; color: #3a4150; }
+.shop-chips .on { background: #1f2430; border-color: #1f2430; color: #fff; }
+.shop-strip { margin: 10px 14px 0; background: #fff4d6; color: #8a5a00; border-radius: 10px; padding: 8px 14px; font-size: 17px; font-weight: 700; }
+.shop-heading { margin: 16px 16px 8px; font-size: 24px; color: #1f2430; }
+.shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 14px; }
+.shop-card { background: #fff; border-radius: 14px; padding: 10px 10px 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; }
+.shop-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: #f0f1f4; display: block; }
+.shop-card h4 { margin: 10px 0 4px; font-size: 18px; line-height: 1.2; color: #1f2430; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.4em; }
+.shop-rating { font-size: 16px; color: #3a4150; } .shop-rating span { color: #f59e0b; } .shop-rating small { color: #8a8f98; font-size: 14px; }
+.shop-price { font-size: 26px; font-weight: 700; color: #1f2430; margin: 2px 0 8px; }
+.shop-add { margin-top: auto; border: 2px solid #2563eb; background: #fff; color: #2563eb; border-radius: 10px; padding: 7px 0; font-size: 17px; font-weight: 700; }
+.shop-spacer { height: 120px; }
+
+/* floating assistant button */
+.shop-fab {
+  position: absolute; right: 18px; bottom: 20px; z-index: 3; width: 78px; height: 78px; border-radius: 50%; border: 0;
+  background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.55); animation: shop-fab-pulse 2.2s ease-in-out infinite;
+}
+@keyframes shop-fab-pulse { 0%, 100% { box-shadow: 0 8px 22px rgba(37, 99, 235, 0.55), 0 0 0 0 rgba(124, 58, 237, 0.45); } 50% { box-shadow: 0 8px 22px rgba(37, 99, 235, 0.55), 0 0 0 14px rgba(124, 58, 237, 0); } }
+.shop-hint-bubble { position: absolute; right: 108px; bottom: 36px; z-index: 3; background: #fff; color: #1f2430; font-weight: 700; font-size: 19px; padding: 9px 16px; border-radius: 14px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2); }
+.shop-hint-bubble::after { content: ''; position: absolute; right: -8px; top: 50%; margin-top: -8px; border: 8px solid transparent; border-left-color: #fff; border-right: 0; }
+
+/* assistant sheet */
+.shop-scrim { position: absolute; inset: 0; z-index: 4; background: rgba(15, 18, 28, 0.45); opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0s 0.3s; }
+.shop-scrim.is-open { opacity: 1; visibility: visible; transition-delay: 0s; }
+.shop-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 84%; z-index: 5; background: #fff; border-radius: 26px 26px 0 0;
+  display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(102%); visibility: hidden; transition: transform 0.38s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s 0.38s;
+}
+.shop-sheet.is-open { transform: none; visibility: visible; transition-delay: 0s; }
+.shop-sheet header { display: flex; align-items: center; gap: 12px; padding: 14px 16px 12px; border-bottom: 1px solid #e6e8ee; flex: none; }
+.shop-sheet header b { display: block; font-size: 21px; color: #1f2430; }
+.shop-sheet header small { font-size: 15px; color: #1a9b50; }
+.shop-sheet header button { margin-left: auto; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #eef0f4; font-size: 26px; line-height: 1; color: #3a4150; }
+.shop-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; align-items: center; justify-content: center; flex: none; }
+.shop-msgs { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; -webkit-overflow-scrolling: touch; padding: 14px 14px 8px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
+.shop-bubble { max-width: 86%; padding: 10px 15px; border-radius: 18px; font-size: 22px; line-height: 1.3; overflow-wrap: anywhere; color: #1f2430; }
+.shop-bubble--bot { align-self: flex-start; background: #eef0f4; border-bottom-left-radius: 5px; }
+.shop-bubble--me { align-self: flex-end; background: #2563eb; color: #fff; border-bottom-right-radius: 5px; }
+.shop-sys { align-self: center; max-width: 92%; text-align: center; font-size: 17px; color: #667085; background: #f3f4f7; border-radius: 10px; padding: 5px 12px; }
+.shop-typing { display: flex; gap: 6px; align-items: center; padding: 14px 16px; }
+.shop-typing i { width: 9px; height: 9px; border-radius: 50%; background: #8a8f98; animation: demo-blink 1s infinite ease-in-out; }
+.shop-typing i:nth-child(2) { animation-delay: 0.15s; } .shop-typing i:nth-child(3) { animation-delay: 0.3s; }
+.shop-input { display: flex; gap: 10px; padding: 10px 12px 16px; border-top: 1px solid #e6e8ee; flex: none; background: #fff; }
+.shop-input input { flex: 1; min-width: 0; border: 2px solid #d8dce3; outline: 0; border-radius: 999px; padding: 11px 18px; font-size: 21px; font-family: inherit; color: #1f2430; background: #fff; }
+.shop-input input:focus { border-color: #2563eb; }
+.shop-input input:disabled { background: #f3f4f7; }
+.shop-input button { width: 50px; height: 50px; border: 0; border-radius: 50%; background: #2563eb; color: #fff; font-size: 21px; flex: none; }
+.shop-input button:disabled { background: #a9bff0; cursor: default; }
+.shop-caption { margin: 0; flex: none; font-size: 20px; color: var(--ink-muted); text-align: center; }
+
+/* ---------- header status ---------- */
+.demo-status { font-size: 20px; color: var(--ink-muted); }
+.demo-status.is-warn { color: #b91c1c; font-weight: 700; }
+
+/* ---------- pipeline ---------- */
+.chain { position: relative; flex: none; }
+.chain__lanes { position: absolute; inset: 0; overflow: visible; }
+.chain-lane { fill: none; stroke: #6b7385; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 0.1 13; }
+.chain-lane.is-dashed { stroke-dasharray: 14 12; stroke-linecap: butt; stroke-width: 4; }
+.chain__lanes text { font-size: 19px; font-weight: 700; fill: #4a5160; }
+
+.chain-box { position: absolute; padding: 8px 26px 8px; display: flex; flex-direction: column; justify-content: center; overflow: visible; border-width: 3px; }
+.demo-box--logic { --box-fill: var(--dg-logic-fill); --box-stroke: var(--dg-logic-stroke); --box-ink: var(--dg-logic-ink); border-radius: 8px; }
+.demo-box--io.chain-box { border-radius: 56px; padding-left: 44px; padding-right: 44px; }
+.chain-box__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.chain-box h3 { margin: 0; font-size: 17px; }
+.chain-box__head small { font-size: 17px; color: var(--box-ink); opacity: 0.8; }
+.chain-box__title { margin: 2px 0 0; font-size: 22px; font-weight: 700; line-height: 1.2; }
+.chain-box__sub { margin: 2px 0 0; font-size: 18px; color: var(--box-ink); opacity: 0.85; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; min-height: 1.2em; }
+.chain-box__text { margin: 2px 0 0; font-size: 22px; font-weight: 700; line-height: 1.25; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.chain-box__text.is-empty { opacity: 0.5; font-weight: 400; }
+.chain-box__checks { margin: 6px 0 0; display: flex; gap: 22px; font-size: 20px; font-weight: 700; }
+.chain-box__checks span { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chain-box__checks span:first-child { flex: 0 0 auto; }
+.chain-box__checks .ok { color: #15803d; } .chain-box__checks .bad { color: #b91c1c; }
+
+/* sequence numbers: they keep counting up across prompts until Reset */
+.chain-num {
+  position: absolute; left: -28px; top: -22px; z-index: 2; min-width: 46px; height: 46px; padding: 0 8px; border-radius: 23px;
+  background: #f59e0b; color: #fff; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35); animation: chain-pop 0.35s ease-out;
+}
+.chain-num.is-stale { background: #9aa3b5; box-shadow: none; }
+@keyframes chain-pop { from { transform: scale(0.3); } 60% { transform: scale(1.25); } to { transform: scale(1); } }
+
+.chain-dot { position: absolute; left: 0; top: 0; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #fde68a 35%, #f59e0b 100%); animation-name: chain-travel; animation-timing-function: linear; animation-fill-mode: both; offset-rotate: 0deg; z-index: 3; }
+.chain-dot--prompt { width: 40px; height: 40px; margin: -20px 0 0 -20px; box-shadow: 0 0 26px 9px rgba(245, 158, 11, 0.85); }
+.chain-dot--token { width: 15px; height: 15px; margin: -7px 0 0 -7px; box-shadow: 0 0 12px 4px rgba(245, 158, 11, 0.9); }
+@keyframes chain-travel { from { offset-distance: 0%; } to { offset-distance: 100%; } }
