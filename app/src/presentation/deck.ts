@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import { notes } from './notes'
+import { addedNotes } from './notesAdded'
 import type { SlideDef, SlideMeta } from './types'
 import * as s01 from './slides/s01-title'
 import * as s02 from './slides/s02-historically'
@@ -43,7 +44,7 @@ import * as s38 from './slides/s38-mcp'
 import * as s39 from './slides/s39-div-qa'
 
 function def(m: { meta: SlideMeta; default: ComponentType }): SlideDef {
-  return { ...m.meta, Component: m.default, notes: notes[m.meta.id] ?? [] }
+  return { ...m.meta, Component: m.default, notes: [...(notes[m.meta.id] ?? []), ...(addedNotes[m.meta.id] ?? [])] }
 }
 
 /** The deck, in presentation order. Reorder, add or remove slides by editing this list. */

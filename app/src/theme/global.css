@@ -218,3 +218,11 @@ a { color: inherit; }
 .carousel__tab[aria-current='true'] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .carousel__caption { text-align: center; font-size: 30px; color: var(--ink-muted); min-height: 1.3em; }
 @media (prefers-reduced-motion: reduce) { .carousel__track { transition: none; } }
+
+/* Discreet corner trigger on a card (e.g. the Single Call card opens the live demo). */
+.tier__peek {
+  position: absolute; right: 14px; bottom: 14px; width: 34px; height: 34px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--ink-muted); opacity: 0.22; display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.2s;
+}
+.tier__peek:hover, .tier__peek:focus-visible { opacity: 0.9; }

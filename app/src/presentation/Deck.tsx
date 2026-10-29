@@ -47,6 +47,10 @@ export default function Deck({ index: idx, onGo: go, active }: DeckProps) {
     if (!active) return
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return
+      // Typing in a text field, or an open overlay (e.g. the phone demo), must not drive the deck.
+      const t = e.target
+      if (t instanceof HTMLElement && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName))) return
+      if (document.querySelector('[data-modal]')) return
       // Enter/Space on a focused button should press the button (e.g. carousel), not advance the slide.
       if ((e.key === ' ' || e.key === 'Enter') && e.target instanceof HTMLButtonElement) return
       switch (e.key) {
