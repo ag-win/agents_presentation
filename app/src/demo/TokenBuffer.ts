@@ -1,13 +1,20 @@
-/** Tokens arrive from the network faster than we animate them; this holds them until their dot leaves the LLM. */
-export class TokenBuffer {
-  private readonly queue: string[] = []
+/**
+ * First-in-first-out hold for items that arrive from the network faster than we animate them
+ * (tokens, chain events). Generic so every demo can reuse it.
+ */
+export class StreamBuffer<T> {
+  private readonly queue: T[] = []
   private finished = false
 
-  push(text: string): void {
-    this.queue.push(text)
+  push(item: T): void {
+    this.queue.push(item)
   }
 
-  shift(): string | undefined {
+  peek(): T | undefined {
+    return this.queue[0]
+  }
+
+  shift(): T | undefined {
     return this.queue.shift()
   }
 

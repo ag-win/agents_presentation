@@ -3,6 +3,7 @@ import { demoSession } from '../demoSession'
 import { useDemo } from '../useDemo'
 import { PhoneChat } from './PhoneChat'
 import { PipelinePanel } from './PipelinePanel'
+import { SlowmoControl } from './SlowmoControl'
 import '../demo.css'
 
 /**
@@ -26,25 +27,7 @@ export function PhoneDemoOverlay({ onClose }: { onClose: () => void }) {
     <div className="demo-overlay" role="dialog" aria-modal="true" aria-label="Single LLM call demo" data-modal>
       <header className="demo-head">
         <h2>One prompt, one LLM call</h2>
-        <div className="demo-slow">
-          <button
-            className={`demo-btn${slowmo.enabled ? ' is-on' : ''}`}
-            aria-pressed={slowmo.enabled}
-            onClick={() => demoSession.setSlowmo({ ...slowmo, enabled: !slowmo.enabled })}
-          >
-            Slow-mo
-          </button>
-          {slowmo.enabled && (
-            <label className="demo-slider">
-              <input
-                type="range" min={2} max={30} step={1} value={slowmo.factor}
-                onChange={(e) => demoSession.setSlowmo({ enabled: true, factor: Number(e.target.value) })}
-                aria-label="Slow-motion factor"
-              />
-              <span>{slowmo.factor}× slower</span>
-            </label>
-          )}
-        </div>
+        <SlowmoControl slowmo={slowmo} onChange={(next) => demoSession.setSlowmo(next)} />
         <button className="demo-btn" onClick={() => demoSession.reset()}>Reset</button>
         <button className="demo-btn demo-btn--icon" onClick={onClose} aria-label="Close">×</button>
       </header>

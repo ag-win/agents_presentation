@@ -31,7 +31,7 @@ function Box({ kind, label, glow, pulse, children }: { kind: 'io' | 'llm'; label
   )
 }
 
-function backendLine(b: BackendStatus): { text: string; warn: boolean } {
+export function backendLine(b: BackendStatus): { text: string; warn: boolean } {
   if (b.state === 'ready') return { text: b.live ? `${b.model} · ${b.provider}` : 'offline mock model (no API key)', warn: !b.live }
   if (b.state === 'offline') return { text: 'backend not reachable — start it with ./start.sh', warn: true }
   return { text: 'checking backend…', warn: false }

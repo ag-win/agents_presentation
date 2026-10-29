@@ -1,7 +1,7 @@
 import type { LlmStreamClient } from './LlmStreamClient'
 import type { Scheduler } from './Scheduler'
 import type { Timings } from './Timings'
-import { TokenBuffer } from './TokenBuffer'
+import { StreamBuffer } from './TokenBuffer'
 import type { DotKind, Lane, PipelineState } from './types'
 
 /** What a run needs from whoever owns the UI state. Keeps PromptRun free of React and of the session. */
@@ -28,7 +28,7 @@ export class PromptRun {
   private readonly host: RunHost
   private readonly signal: AbortSignal
 
-  private readonly buffer = new TokenBuffer()
+  private readonly buffer = new StreamBuffer<string>()
   private failure: string | null = null
   private emitted = 0
   private inFlight = 0
