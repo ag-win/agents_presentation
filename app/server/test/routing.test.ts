@@ -189,7 +189,7 @@ describe('HTTP routes with the offline mocks', () => {
 
   it('GET /api/route/defaults lists the router and specialists with their prompts', async () => {
     const d = await (await fetch(`${base}/api/route/defaults`)).json() as { search: { provider: string }; router: { systemPrompt: string }; specialists: { id: string }[] }
-    assert.equal(d.search.provider, 'mock')
+    assert.equal(d.search.provider, 'backup')
     assert.match(d.router.systemPrompt, /exactly one word/)
     assert.deepEqual(d.specialists.map((s) => s.id), ['food', 'travel', 'health', 'general'])
   })
