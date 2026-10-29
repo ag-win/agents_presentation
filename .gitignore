@@ -1,0 +1,16 @@
+# Source material (large PDFs/pptx, a nested git repo and a .env with a secret). Keep it local only.
+reference/
+
+# Dependencies and build output
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Secrets: copy .env.example to .env and fill it in
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+*.log
