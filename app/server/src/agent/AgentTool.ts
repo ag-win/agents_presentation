@@ -11,6 +11,8 @@ export interface ToolRunContext {
   spawn(task: string): AsyncGenerator<AgentEvent, string>
   /** A single plain model call with no tools. */
   ask(prompt: string): Promise<string>
+  /** Pause until a person approves (true) or declines (false). The tool should announce the request first (approval_request event). */
+  waitForHuman(): Promise<boolean>
 }
 
 /**

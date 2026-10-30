@@ -28,6 +28,19 @@ export class AgentClient {
     }
   }
 
+  /** A person's answer to a paused tool (the Approve / Decline buttons). */
+  async decide(runId: string, callId: string, approved: boolean): Promise<void> {
+    try {
+      await fetch(`${this.baseUrl}/api/agent/decision`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ run: runId, call: callId, approved }),
+      })
+    } catch {
+      // If this fails the server times the request out and the run carries on as a decline.
+    }
+  }
+
   /** Streams every box the agent creates, in order. `tools` is the list switched on in the palette. */
   async *stream(task: string, tools: readonly string[], systems: Readonly<Record<string, string>>, signal: AbortSignal): AsyncGenerator<AgentStreamEvent> {
     let res: Response

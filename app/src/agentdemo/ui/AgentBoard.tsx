@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BLANK_NODE, type NodeState } from '../../supportdemo/types'
 import type { Laid } from '../AgentLayout'
 import { agentConfig } from '../sharedSession'
+import { ApprovalCard } from './ApprovalCard'
 import type { AgentDot, AgentSnapshot, GraphNode, ToolInfo } from '../types'
 
 /** One glowing dot following its line's path. Its start offset is fixed on mount so re-renders never restart it. */
@@ -138,6 +139,13 @@ export function AgentBoard({ snap, laid, tools, disabled, locked, selected }: Bo
           </button>
         )
       })}
+
+      {snap.approval && laid.rects[snap.approval.id] && (
+        // sits just under the tool box that is waiting, so it moves and zooms with the board
+        <div className="ag-approval-anchor" style={{ left: laid.rects[snap.approval.id].x, top: laid.rects[snap.approval.id].y + laid.rects[snap.approval.id].h + 16 }}>
+          <ApprovalCard approval={snap.approval} />
+        </div>
+      )}
 
       {snap.dots.map((d) => <Dot key={d.id} dot={d} laid={laid} />)}
     </div>

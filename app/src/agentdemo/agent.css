@@ -41,3 +41,15 @@
 
 /* an LLM box's verdict ("2 tools", "final answer") hangs below it so it never covers the label */
 .ag-chip-below .sverdict { top: auto; bottom: -36px; right: 50%; transform: translateX(50%); }
+
+/* human approval: the card under the paused tool box (and the same card in the play-by-play) */
+.ag-approval-anchor { position: absolute; z-index: 9; width: 360px; }
+.ag-approval { flex: none; background: #e3f0ff; border: 3px solid #3b82c4; border-radius: 14px; padding: 8px 16px 10px; box-shadow: 0 8px 26px rgba(20, 22, 28, 0.2); }
+.ag-approval h4 { margin: 0 0 2px; font-size: 22px; color: #174f86; }
+.ag-approval p { margin: 0 0 6px; font-size: 21px; line-height: 1.25; color: #17324f; overflow-wrap: anywhere; }
+.ag-approval small { font-size: 19px; color: #174f86; }
+.ag-approval__buttons { display: flex; gap: 12px; margin: 2px 0 4px; }
+.ag-approval__buttons .demo-btn { padding: 4px 22px; font-size: 24px; }
+.ag-approval.is-approved { background: #e8f7ec; border-color: #9ad3ae; } .ag-approval.is-approved h4 { color: #15803d; }
+.ag-approval.is-declined, .ag-approval.is-timeout { background: #fde9e9; border-color: #f0a3a3; } .ag-approval.is-declined h4, .ag-approval.is-timeout h4 { color: #b91c1c; }
+.sx__panel .ag-approval { box-shadow: none; }

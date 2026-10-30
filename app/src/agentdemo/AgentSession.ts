@@ -65,6 +65,14 @@ export class AgentSession {
     new AgentRun(task, this.config.enabled(), this.config.systems(), slowmo.enabled ? slowmo.factor : 1, this.stream, this.scheduler, this.host(), this.abort.signal).start()
   }
 
+  /** The person presses Approve or Decline on a paused tool: the run carries on with their answer. */
+  decide(approved: boolean): void {
+    const { approval, runId } = this.snapshot
+    if (!approval || approval.status !== 'waiting' || !runId) return
+    this.update({ approval: { ...approval, status: approved ? 'approved' : 'declined' } })
+    void this.stream.decide(runId, approval.id, approved)
+  }
+
   /** Stop anything running, clear the board, restore the toolbox and default prompts, and empty the workspace. */
   reset(): void {
     this.abort?.abort()
@@ -97,7 +105,7 @@ export class AgentSession {
     this.nextRow = 1
     this.layoutCache = null
     return {
-      task: '', busy: false, nodes: [], agents: [], states: {}, counter: 0, thick: [], dots: [], used: {}, glowing: {}, trace: [],
+      task: '', runId: null, approval: null, busy: false, nodes: [], agents: [], states: {}, counter: 0, thick: [], dots: [], used: {}, glowing: {}, trace: [],
       final: null, error: null, stats: { startedAt: null, elapsedMs: null }, slowmo, backend,
     }
   }
@@ -170,6 +178,13 @@ export class AgentSession {
         this.patchState(id, () => ({ glow: false }))
         this.patchRow(id, () => ({ live: false }))
       },
+      setRun: (runId) => this.update({ runId }),
+      approvalRequest: (id, summary) => {
+        this.update({ approval: { id, summary, status: 'waiting' } })
+        const verdict = { text: 'waiting', tone: 'info' as const }
+        this.patchState(id, () => ({ verdict }))
+        this.patchRow(id, () => ({ verdict }))
+      },
       addAgent: (agent, parent, task) => {
         const info: AgentInfo = { id: agent, parent, task, order: parent === null ? 0 : this.snapshot.agents.filter((a) => a.parent !== null).length + 1 }
         this.update({ agents: [...this.snapshot.agents, info] })
@@ -187,7 +202,11 @@ export class AgentSession {
       },
       toolResult: (id, result, error) => {
         this.patchNode(id, (n) => (n.kind === 'tool' ? { ...n, result, error } : n))
-        const verdict = { text: error ? 'error' : 'ok', tone: error ? ('bad' as const) : ('good' as const) }
+        // A tool that waited for a person: if no answer ever came (timeout or Stop), say so.
+        const pending = this.snapshot.approval
+        if (pending && pending.id === id && pending.status === 'waiting') this.update({ approval: { ...pending, status: 'timeout' } })
+        const after = this.snapshot.approval && this.snapshot.approval.id === id ? this.snapshot.approval.status : null
+        const verdict = after === 'declined' ? { text: 'declined', tone: 'bad' as const } : after === 'timeout' ? { text: 'no answer', tone: 'bad' as const } : { text: error ? 'error' : 'ok', tone: error ? ('bad' as const) : ('good' as const) }
         this.patchState(id, () => ({ verdict, text: result }))
         this.patchRow(id, (r) => ({ body: `${r.body}\n→ ${result}`, verdict, live: false }))
         const node = this.snapshot.nodes.find((n) => n.id === id)

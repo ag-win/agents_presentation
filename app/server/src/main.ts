@@ -1,4 +1,5 @@
 import { AgentLoop } from './agent/AgentLoop.ts'
+import { ApprovalBroker } from './agent/ApprovalBroker.ts'
 import { AgentPromptCatalog } from './agent/AgentPrompts.ts'
 import { AgentTaskCatalog } from './agent/AgentTaskCatalog.ts'
 import { AgentToolbox } from './agent/AgentTool.ts'
@@ -6,7 +7,7 @@ import { FileSandbox } from './agent/FileSandbox.ts'
 import { EscalateTool, FeedbackTool, OrderStatusAgentTool, ProductReviewsTool, ProductSpecsTool, ShopPolicyTool } from './agent/tools/ShopTools.ts'
 import { AskModelTool, CalculatorTool, ReadFileTool, SpawnAgentTool, WebSearchTool, WriteFileTool } from './agent/tools/GeneralTools.ts'
 import { AgentService } from './application/AgentService.ts'
-import { AgentDefaultsRoute, AgentStreamRoute, AgentWorkspaceClearRoute } from './http/routes/AgentRoutes.ts'
+import { AgentDecisionRoute, AgentDefaultsRoute, AgentStreamRoute, AgentWorkspaceClearRoute } from './http/routes/AgentRoutes.ts'
 import { ChainService } from './application/ChainService.ts'
 import { PromptComposer } from './application/PromptComposer.ts'
 import { ProviderSwitchService } from './application/ProviderSwitchService.ts'
@@ -70,7 +71,7 @@ async function main(): Promise<void> {
     new WebSearchTool(search), new CalculatorTool(), new WriteFileTool(files), new ReadFileTool(files), new AskModelTool(), new SpawnAgentTool(),
   ])
   const agentPrompts = new AgentPromptCatalog()
-  const agentService = new AgentService(new AgentLoop(provider, agentToolbox), provider, agentToolbox, agentPrompts, new AgentTaskCatalog(), new ScenarioCatalog(), files)
+  const agentService = new AgentService(new AgentLoop(provider, agentToolbox), provider, agentToolbox, agentPrompts, new AgentTaskCatalog(), new ScenarioCatalog(), files, new ApprovalBroker())
   const server = new HttpServer(
     config.host,
     config.port,
@@ -86,6 +87,7 @@ async function main(): Promise<void> {
       new AgentDefaultsRoute(agentService),
       new AgentStreamRoute(agentService, { maxTask: 600, maxSystem: 3000 }, logger),
       new AgentWorkspaceClearRoute(agentService),
+      new AgentDecisionRoute(agentService),
       new SupportStreamRoute(supportService, { maxMessage: 600, maxSystem: 2500 }, logger),
     ],
     logger,

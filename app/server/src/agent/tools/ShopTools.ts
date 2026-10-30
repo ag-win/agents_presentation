@@ -3,7 +3,8 @@ import type { OrderDatabase } from '../../shop/OrderDatabase.ts'
 import { ShopClock } from '../../shop/ShopClock.ts'
 import type { ProductCatalog } from '../../shop/ProductCatalog.ts'
 import { SHOP_POLICY } from '../../support/ShopPolicy.ts'
-import { SimpleTool, type ToolCategory } from '../AgentTool.ts'
+import type { AgentEvent } from '../../domain/AgentEvent.ts'
+import { SimpleTool, type AgentTool, type ToolCategory, type ToolRunContext } from '../AgentTool.ts'
 
 const str = (value: unknown): string => (typeof value === 'string' ? value : value === undefined || value === null ? '' : String(value))
 const object = (properties: Record<string, unknown>, required: string[]) => ({ type: 'object', properties, required })
@@ -101,17 +102,25 @@ export class FeedbackTool extends SimpleTool {
   }
 }
 
-export class EscalateTool extends SimpleTool {
+/**
+ * Human in the loop: the model asks to hand the case to a person, and the run PAUSES until a human approves or declines
+ * on screen. Only then does the tool return, so the model's next step depends on what the person decided.
+ */
+export class EscalateTool implements AgentTool {
   readonly category: ToolCategory = 'shop'
   readonly label = 'Escalate'
   readonly definition: ToolDefinition = {
     name: 'escalate_to_human',
-    description: 'Hand the case to a human support agent. Use it for very angry customers, legal threats, payment or fraud problems, or when asked for a person. Nothing is sent to the customer by this tool.',
+    description: 'Hand the case to a human support agent, who must approve it first (this call waits for them). Use it for very angry customers, legal threats, payment or fraud problems, or when asked for a person. It sends nothing to the customer.',
     parameters: object({ summary: { type: 'string', description: 'Two short sentences for the human agent: what happened and how upset the customer is.' } }, ['summary']),
   }
   private cases = 1041
 
-  protected async execute(): Promise<string> {
-    return `Case ESC-${++this.cases} created for a human agent. Tell the customer a colleague will contact them personally. Promise nothing else.`
+  async *run(args: Readonly<Record<string, unknown>>, ctx: ToolRunContext): AsyncGenerator<AgentEvent, string> {
+    yield { type: 'approval_request', id: ctx.callId, summary: str(args.summary).slice(0, 400) }
+    const approved = await ctx.waitForHuman()
+    return approved
+      ? `A human approved the escalation. Case ESC-${++this.cases} was created. Tell the customer a colleague will contact them personally. Promise nothing else.`
+      : 'A human declined to take this case (or did not answer in time). Do not promise a callback. Apologise briefly, tell the customer you could not arrange it, and ask for any extra detail.'
   }
 }

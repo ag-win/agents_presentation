@@ -3,6 +3,7 @@ import type { AgentEvent } from '../domain/AgentEvent.ts'
 import type { ToolCall } from '../domain/Tool.ts'
 import type { LlmProvider } from '../llm/LlmProvider.ts'
 import { runParallel } from '../support/runParallel.ts'
+import type { ApprovalBroker } from './ApprovalBroker.ts'
 import { AgentToolbox } from './AgentTool.ts'
 
 export interface AgentLimits {
@@ -26,6 +27,9 @@ export class AgentBudget {
 }
 
 export interface AgentRun {
+  readonly runId: string
+  /** Where tools that need a person's approval wait for it. */
+  readonly approvals: ApprovalBroker
   readonly signal: AbortSignal
   readonly budget: AgentBudget
   readonly systems: { readonly agent: string; readonly subagent: string }
@@ -116,6 +120,7 @@ export class AgentLoop {
           callId,
           spawn: (task) => this.spawn(run, callId, task, depth),
           ask: (prompt) => this.ask(run, prompt),
+          waitForHuman: () => run.approvals.wait(run.runId, callId, run.signal),
         })
       } catch (cause) {
         if (run.signal.aborted) throw cause

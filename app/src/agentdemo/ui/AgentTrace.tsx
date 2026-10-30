@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { AgentSnapshot } from '../types'
+import { ApprovalCard } from './ApprovalCard'
 
 function seconds(ms: number | null): string {
   return ms === null ? '…' : `${(ms / 1000).toFixed(1)} s`
@@ -34,6 +35,7 @@ export function AgentTrace({ snap }: { snap: AgentSnapshot }) {
           </div>
         </div>
       ))}
+      {snap.approval && <ApprovalCard approval={snap.approval} />}
       {snap.error && <p className="strace__error">{snap.error}</p>}
       {snap.final && <div className="strace__reply is-sent"><h4>Answer</h4><p>{snap.final}</p></div>}
     </div>

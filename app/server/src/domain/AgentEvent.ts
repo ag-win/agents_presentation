@@ -3,6 +3,20 @@
  * by the model, so every box is announced as it appears: agents, their LLM calls, and the tool calls each call makes.
  * Ids are hierarchical: agent "a0", its second LLM call "a0.s2", that call's first tool call "a0.s2.c1".
  */
+/** First event of a run: its id, which the client needs to answer a human-approval request. */
+export interface AgentRunEvent {
+  readonly type: 'run'
+  readonly runId: string
+}
+
+/** A tool is waiting for a person to approve or decline before it does anything. The run is paused until they answer. */
+export interface AgentApprovalRequestEvent {
+  readonly type: 'approval_request'
+  /** The tool-call id to answer. */
+  readonly id: string
+  readonly summary: string
+}
+
 export interface AgentStartEvent {
   readonly type: 'agent_start'
   readonly agent: string
@@ -66,6 +80,8 @@ export interface AgentDoneEvent {
 }
 
 export type AgentEvent =
+  | AgentRunEvent
+  | AgentApprovalRequestEvent
   | AgentStartEvent
   | AgentLlmStartEvent
   | AgentTokenEvent

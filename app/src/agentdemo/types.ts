@@ -35,6 +35,8 @@ export interface AgentDefaults {
 /** Lines streamed by POST /api/agent/stream (see app/server). */
 export type AgentStreamEvent =
   | { readonly type: 'start'; readonly provider: string; readonly model: string; readonly live: boolean }
+  | { readonly type: 'run'; readonly runId: string }
+  | { readonly type: 'approval_request'; readonly id: string; readonly summary: string }
   | { readonly type: 'agent_start'; readonly agent: string; readonly parent: string | null; readonly task: string }
   | { readonly type: 'llm_start'; readonly agent: string; readonly id: string; readonly step: number; readonly context: number }
   | { readonly type: 'token'; readonly id: string; readonly text: string }
@@ -80,8 +82,17 @@ export interface RunStats {
   readonly elapsedMs: number | null
 }
 
+/** A tool is paused waiting for a person (the run does not continue until they answer). */
+export interface Approval {
+  readonly id: string
+  readonly summary: string
+  readonly status: 'waiting' | 'approved' | 'declined' | 'timeout'
+}
+
 export interface AgentSnapshot {
   readonly task: string
+  readonly runId: string | null
+  readonly approval: Approval | null
   readonly busy: boolean
   readonly nodes: readonly GraphNode[]
   readonly agents: readonly AgentInfo[]

@@ -11,6 +11,8 @@ export interface AgentHost {
   isLit(id: string): boolean
   light(id: string): void
   unlight(id: string): void
+  setRun(runId: string): void
+  approvalRequest(id: string, summary: string): void
   addAgent(agent: string, parent: string | null, task: string): void
   addLlm(agent: string, id: string, step: number, context: number): void
   endLlm(id: string, calls: number): void
@@ -141,6 +143,12 @@ export class AgentRun {
     const h = this.host
     const t = this.timings
     switch (event.type) {
+      case 'run':
+        h.setRun(event.runId)
+        return
+      case 'approval_request':
+        h.approvalRequest(event.id, event.summary)
+        return
       case 'agent_start':
         h.addAgent(event.agent, event.parent, event.task)
         return

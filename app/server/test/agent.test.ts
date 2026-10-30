@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { after, before, describe, it } from 'node:test'
 import { AgentLoop, AgentBudget, type AgentLimits, DEFAULT_LIMITS } from '../src/agent/AgentLoop.ts'
+import { ApprovalBroker } from '../src/agent/ApprovalBroker.ts'
 import { AgentPromptCatalog } from '../src/agent/AgentPrompts.ts'
 import { AgentRequest } from '../src/agent/AgentRequest.ts'
 import { AgentTaskCatalog } from '../src/agent/AgentTaskCatalog.ts'
@@ -18,7 +19,7 @@ import type { AgentEvent } from '../src/domain/AgentEvent.ts'
 import type { StreamEvent } from '../src/domain/StreamEvent.ts'
 import { ValidationError } from '../src/errors/AppError.ts'
 import { HttpServer } from '../src/http/HttpServer.ts'
-import { AgentDefaultsRoute, AgentStreamRoute, AgentWorkspaceClearRoute } from '../src/http/routes/AgentRoutes.ts'
+import { AgentDecisionRoute, AgentDefaultsRoute, AgentStreamRoute, AgentWorkspaceClearRoute } from '../src/http/routes/AgentRoutes.ts'
 import type { GenerationOptions, LlmProvider } from '../src/llm/LlmProvider.ts'
 import { MockProvider } from '../src/llm/MockProvider.ts'
 import { SilentLogger } from '../src/logging/Logger.ts'
@@ -66,13 +67,23 @@ before(async () => {
 })
 after(async () => { await rm(dir, { recursive: true, force: true }) })
 
-async function run(brain: LlmProvider, task: string, opts: { enabled?: string[]; limits?: AgentLimits } = {}) {
+/** `human` answers a paused tool: it is called when an approval_request arrives and returns approve (true) or decline (false). */
+async function run(brain: LlmProvider, task: string, opts: { enabled?: string[]; limits?: AgentLimits; human?: (e: Extract<AgentEvent, { type: 'approval_request' }>) => boolean } = {}) {
   const loop = new AgentLoop(brain, toolbox, opts.limits ?? DEFAULT_LIMITS)
   const budget = new AgentBudget()
+  const approvals = new ApprovalBroker(2000)
   const events: AgentEvent[] = []
-  const gen = loop.run({ signal: new AbortController().signal, budget, systems, enabled: opts.enabled ?? allNames() }, 'a0', null, task, 0)
+  const gen = loop.run({ runId: 'r1', approvals, signal: new AbortController().signal, budget, systems, enabled: opts.enabled ?? allNames() }, 'a0', null, task, 0)
   let step = await gen.next()
-  while (!step.done) { events.push(step.value); step = await gen.next() }
+  while (!step.done) {
+    events.push(step.value)
+    if (step.value.type === 'approval_request') {
+      const answer = (opts.human ?? (() => true))(step.value)
+      // the person answers a moment later, from another request
+      setTimeout(() => approvals.decide('r1', (step.value as { id: string }).id, answer), 5)
+    }
+    step = await gen.next()
+  }
   return { events, answer: step.value, budget }
 }
 const types = (events: AgentEvent[]) => events.map((e) => e.type)
@@ -233,6 +244,70 @@ describe('AgentLoop', () => {
   })
 })
 
+describe('ApprovalBroker', () => {
+  const signal = () => new AbortController().signal
+  it('resolves a waiting request with the person\'s answer, once', async () => {
+    const broker = new ApprovalBroker(1000)
+    const waiting = broker.wait('r', 'c1', signal())
+    assert.equal(broker.waiting, 1)
+    assert.equal(broker.decide('r', 'c1', true), true)
+    assert.equal(await waiting, true)
+    assert.equal(broker.decide('r', 'c1', false), false)
+    assert.equal(broker.waiting, 0)
+  })
+  it('treats no answer, a stopped run and an already-aborted run as a decline, and never leaks a timer', async () => {
+    const broker = new ApprovalBroker(20)
+    assert.equal(await broker.wait('r', 'slow', signal()), false)
+    const stop = new AbortController()
+    const stopped = new ApprovalBroker(5000).wait('r', 'c', stop.signal)
+    stop.abort()
+    assert.equal(await stopped, false)
+    stop.abort()
+    assert.equal(await new ApprovalBroker(5000).wait('r', 'c', stop.signal), false)
+    assert.equal(broker.decide('r', 'nothing', true), false)
+  })
+})
+
+describe('human in the loop (escalate_to_human)', () => {
+  const escalating = () => new Brain((m) => (lastTool(m).length ? { text: `Result seen: ${lastTool(m)[0].slice(0, 40)}` } : { calls: [{ name: 'escalate_to_human', args: { summary: 'Angry customer, order 4825' } }] }))
+
+  it('pauses the run until a person approves, then hands the model the approval', async () => {
+    const { events, answer } = await run(escalating(), 'I am furious', { human: () => true })
+    const order = types(events)
+    assert.ok(order.indexOf('approval_request') < order.indexOf('tool_result'), 'the request must come before the result')
+    assert.deepEqual(events.find((e) => e.type === 'approval_request'), { type: 'approval_request', id: 'a0.s1.c1', summary: 'Angry customer, order 4825' })
+    assert.match((events.find((e) => e.type === 'tool_result') as { result: string }).result, /human approved the escalation. Case ESC-/)
+    assert.match(answer, /approved/)
+  })
+
+  it('tells the model when the person declines, so it does not promise a callback', async () => {
+    const { events, answer } = await run(escalating(), 'I am furious', { human: () => false })
+    const result = (events.find((e) => e.type === 'tool_result') as { result: string; error: boolean })
+    assert.match(result.result, /declined/)
+    assert.match(result.result, /Do not promise a callback/)
+    assert.equal(result.error, false)
+    assert.match(answer, /declined/)
+  })
+
+  it('does not run the rest of the agent while waiting', async () => {
+    const brain = escalating()
+    const loop = new AgentLoop(brain, toolbox)
+    const approvals = new ApprovalBroker(5000)
+    const gen = loop.run({ runId: 'r2', approvals, signal: new AbortController().signal, budget: new AgentBudget(), systems, enabled: allNames() }, 'a0', null, 'x', 0)
+    const seen: string[] = []
+    let waited = false
+    const consume = (async () => { for await (const e of { [Symbol.asyncIterator]: () => gen }) seen.push(e.type) })()
+    for (let i = 0; i < 200 && approvals.waiting === 0; i++) await new Promise((r) => setTimeout(r, 5))
+    assert.equal(approvals.waiting, 1)
+    await new Promise((r) => setTimeout(r, 60))
+    waited = !seen.includes('tool_result') && brain.seen.length === 1
+    assert.equal(waited, true, 'no result and no second LLM call while a person has not answered')
+    approvals.decide('r2', 'a0.s1.c1', true)
+    await consume
+    assert.ok(seen.includes('tool_result') && brain.seen.length === 2)
+  })
+})
+
 describe('sub-agents', () => {
   const brain = () => new Brain((m, o) => {
     const system = m.find((x) => x.role === 'system')?.content
@@ -283,8 +358,8 @@ describe('agent HTTP routes (offline mock model)', () => {
   before(async () => {
     const provider = new MockProvider(0)
     const prompts = new AgentPromptCatalog()
-    const service = new AgentService(new AgentLoop(provider, toolbox), provider, toolbox, prompts, new AgentTaskCatalog(), new ScenarioCatalog(), files)
-    server = new HttpServer('127.0.0.1', 0, [new AgentDefaultsRoute(service), new AgentStreamRoute(service, { maxTask: 600, maxSystem: 3000 }, new SilentLogger()), new AgentWorkspaceClearRoute(service)], new SilentLogger())
+    const service = new AgentService(new AgentLoop(provider, toolbox), provider, toolbox, prompts, new AgentTaskCatalog(), new ScenarioCatalog(), files, new ApprovalBroker(2000))
+    server = new HttpServer('127.0.0.1', 0, [new AgentDefaultsRoute(service), new AgentStreamRoute(service, { maxTask: 600, maxSystem: 3000 }, new SilentLogger()), new AgentWorkspaceClearRoute(service), new AgentDecisionRoute(service)], new SilentLogger())
     base = `http://127.0.0.1:${await server.start()}`
   })
   after(async () => { await server.stop() })
@@ -306,6 +381,15 @@ describe('agent HTTP routes (offline mock model)', () => {
     assert.deepEqual(lines[lines.length - 1], { type: 'done', llmCalls: 2, toolCalls: 1 })
     const bad = await fetch(`${base}/api/agent/stream`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: 'x', tools: ['nope'] }) })
     assert.equal(bad.status, 400)
+  })
+  it('starts every stream with the run id, and POST /api/agent/decision validates and answers', async () => {
+    const res = await fetch(`${base}/api/agent/stream`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ task: 'Capital of Kenya?' }) })
+    const lines = (await res.text()).trim().split('\n').map((l) => JSON.parse(l) as { type: string; runId?: string })
+    assert.equal(lines[1].type, 'run')
+    assert.match(lines[1].runId ?? '', /^[0-9a-f-]{36}$/)
+    const post = (body: unknown) => fetch(`${base}/api/agent/decision`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    assert.equal((await post({ run: 'x', call: 'y', approved: 'yes' })).status, 400)
+    assert.deepEqual(await (await post({ run: 'x', call: 'y', approved: true })).json(), { ok: false })
   })
   it('POST /api/agent/workspace/clear empties the workspace', async () => {
     await files.write('tmp.txt', 'x')

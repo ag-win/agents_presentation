@@ -1,6 +1,8 @@
+import { randomUUID } from 'node:crypto'
 import type { AgentEvent } from '../domain/AgentEvent.ts'
 import type { LlmProvider } from '../llm/LlmProvider.ts'
 import { AgentBudget, AgentLoop } from '../agent/AgentLoop.ts'
+import type { ApprovalBroker } from '../agent/ApprovalBroker.ts'
 import type { AgentPromptCatalog } from '../agent/AgentPrompts.ts'
 import type { AgentRequest } from '../agent/AgentRequest.ts'
 import type { AgentTaskCatalog } from '../agent/AgentTaskCatalog.ts'
@@ -18,8 +20,9 @@ export class AgentService {
   private readonly tasks: AgentTaskCatalog
   private readonly scenarios: ScenarioCatalog
   private readonly files: FileSandbox
+  private readonly approvals: ApprovalBroker
 
-  constructor(loop: AgentLoop, provider: LlmProvider, toolbox: AgentToolbox, prompts: AgentPromptCatalog, tasks: AgentTaskCatalog, scenarios: ScenarioCatalog, files: FileSandbox) {
+  constructor(loop: AgentLoop, provider: LlmProvider, toolbox: AgentToolbox, prompts: AgentPromptCatalog, tasks: AgentTaskCatalog, scenarios: ScenarioCatalog, files: FileSandbox, approvals: ApprovalBroker) {
     this.loop = loop
     this.provider = provider
     this.toolbox = toolbox
@@ -27,15 +30,18 @@ export class AgentService {
     this.tasks = tasks
     this.scenarios = scenarios
     this.files = files
+    this.approvals = approvals
   }
 
   async *run(request: AgentRequest, signal: AbortSignal): AsyncGenerator<AgentEvent> {
     const budget = new AgentBudget()
+    const runId = randomUUID()
+    yield { type: 'run', runId }
     const systems = {
       agent: request.systems.agent ?? this.prompts.defaultText('agent'),
       subagent: request.systems.subagent ?? this.prompts.defaultText('subagent'),
     }
-    const answer = yield* this.loop.run({ signal, budget, systems, enabled: request.tools }, 'a0', null, request.task, 0)
+    const answer = yield* this.loop.run({ runId, approvals: this.approvals, signal, budget, systems, enabled: request.tools }, 'a0', null, request.task, 0)
     yield { type: 'final', text: answer }
     yield { type: 'done', llmCalls: budget.llmCalls, toolCalls: budget.toolCalls }
   }
@@ -50,6 +56,11 @@ export class AgentService {
 
   get promptIds(): string[] {
     return this.prompts.ids
+  }
+
+  /** A person's answer to a paused tool. False if nothing was waiting. */
+  decide(runId: string, callId: string, approved: boolean): boolean {
+    return this.approvals.decide(runId, callId, approved)
   }
 
   async clearWorkspace(): Promise<void> {
