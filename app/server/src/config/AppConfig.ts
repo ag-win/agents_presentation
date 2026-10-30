@@ -26,6 +26,8 @@ export class AppConfig {
   readonly awsSecretAccessKey: string | undefined
   readonly awsSessionToken: string | undefined
   readonly bedrockModel: string
+  /** The presenter's name for the title slide (PRESENTER_NAME in .env). Empty when not set. */
+  readonly presenterName: string
 
   private constructor(values: {
     host: string
@@ -47,6 +49,7 @@ export class AppConfig {
     awsSecretAccessKey: string | undefined
     awsSessionToken: string | undefined
     bedrockModel: string
+    presenterName: string
   }) {
     this.host = values.host
     this.port = values.port
@@ -67,6 +70,7 @@ export class AppConfig {
     this.awsSecretAccessKey = values.awsSecretAccessKey
     this.awsSessionToken = values.awsSessionToken
     this.bedrockModel = values.bedrockModel
+    this.presenterName = values.presenterName
   }
 
   /** True when Bedrock credentials are present (an API key, or an access key pair). */
@@ -99,6 +103,7 @@ export class AppConfig {
       awsSessionToken: env.AWS_SESSION_TOKEN?.trim() || undefined,
       // Amazon's own model: no marketplace subscription needed. Claude Haiku 5.5 is "global.anthropic.claude-haiku-5-5".
       bedrockModel: env.BEDROCK_MODEL?.trim() || 'global.amazon.nova-2-lite-v1:0',
+      presenterName: (env.PRESENTER_NAME ?? '').trim().slice(0, 80),
     })
   }
 }

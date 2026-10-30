@@ -1,6 +1,12 @@
 // Speaker notes written for this app (not from the original pptx), keyed by slide id.
 // They are appended after the pptx notes in notes.ts, which is kept verbatim.
 export const addedNotes: Record<string, string[]> = {
+  s15a: [
+    "THE POINT: three words get used loosely, so fix them once, briefly, before they are used for the rest of the talk. Agent is the thing, agentic is how it behaves, agency is how much freedom it has.",
+    "SAY IT LIKE THIS: \"An agent is a system built around a language model that can decide what to do next, use tools, and act to reach a goal. Agentic AI is the approach: AI that pursues a goal on its own. Unlike a chatbot, which only generates text, it plans steps, calls real tools such as APIs, files, browsers and code, watches what happens, and adjusts, looping until the task is done. Agency is the quality underneath both: how much of the deciding is left to the model rather than to a script a human wrote.\"",
+    "WHY THREE: it sets up the next slides. The three tiers (single call, workflow, agent) are really three levels of agency, and the single question on the three-tiers slide, 'who decides the next step?', is the definition of agency in one line.",
+    "IF ASKED 'is a chatbot an agent?': a plain chatbot only generates text, so no. A chatbot that can look things up and take actions in a loop, deciding for itself when to stop, starts to be one. It is a spectrum, not a switch.",
+  ],
   s30: [
     "THE POINT: same shop, same tools, same customer messages as the ShopEase desk, but nobody draws the path. One LLM is given a toolbox and decides for itself what to do next. This is the moment 'workflow' becomes 'agent': the model, not the human, chooses the next step. Say that the ShopEase story is still fictional.",
     "LIVE DEMO: open it with the \"Live demo\" button at the top right. Esc or x closes it. Every task starts from a clean slate (boxes, numbers, lines and the play-by-play reset). What you switch on or off in the toolbox, your system prompt edits and slow-mo are kept until you press Reset (Reset also empties the agent's file workspace and switches every tool back on).",

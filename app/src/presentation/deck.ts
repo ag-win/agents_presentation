@@ -17,6 +17,7 @@ import * as s12 from './slides/s12-business'
 import * as s13 from './slides/s13-agent-adoption'
 import * as s14 from './slides/s14-backup-usecases'
 import * as s15 from './slides/s15-div-agents'
+import * as s15a from './slides/s15a-definitions'
 import * as s15b from './slides/s15b-everyday-ai'
 import * as s16 from './slides/s16-three-tiers'
 import * as s17 from './slides/s17-augmented-llm'
@@ -63,6 +64,7 @@ export const slides: SlideDef[] = [
   def(s13),
   def(s14),
   def(s15),
+  def(s15a),
   def(s15b),
   def(s16),
   def(s17),
