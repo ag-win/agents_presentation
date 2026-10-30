@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { restartTimer } from '../presentation/DeckTimer'
 
 export default function Start() {
   const nav = useNavigate()
@@ -8,7 +9,7 @@ export default function Start() {
         <h1>AI: From Attention to Agents</h1>
         <p>Choose where to start</p>
       </header>
-      <button className="start__btn start__btn--left" onClick={() => nav('/presentation')}>
+      <button className="start__btn start__btn--left" onClick={() => { restartTimer(); nav('/presentation') }}>
         <span className="start__btn-label">Enter Presentation</span>
         <span className="start__btn-sub">The talk, slide by slide</span>
       </button>

@@ -2,7 +2,7 @@ import { DiagramSlide } from '../layouts'
 import { ObserveReasonAct } from '../diagrams'
 import type { SlideMeta } from '../types'
 
-export const meta: SlideMeta = { id: 's34', title: 'Same loop, different hands: Computer Use', optional: true }
+export const meta: SlideMeta = { id: 's34', title: 'Same loop, different hands: Computer Use', optional: true, backup: true }
 
 export default function S34() {
   return (

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { slides } from './deck'
+import { DeckTimer, startTimer } from './DeckTimer'
 
 const W = 1920
 const H = 1080
@@ -31,6 +32,9 @@ export default function Deck({ index: idx, onGo: go, active }: DeckProps) {
   const [showNotes, setShowNotes] = useState(false)
   const [jump, setJump] = useState(false)
   const [showHidden, setShowHidden] = useState(false)
+
+  // The talk's clock starts the first time the presentation is on screen.
+  useEffect(() => { if (active) startTimer() }, [active])
 
   const visible = useMemo(
     () => slides.map((s, i) => ({ s, i })).filter(({ s, i }) => showHidden || !s.backup || i === idx).map(({ i }) => i),
@@ -78,6 +82,7 @@ export default function Deck({ index: idx, onGo: go, active }: DeckProps) {
 
   return (
     <div className="deck">
+      <DeckTimer />
       <div className="deck__progress" style={{ width: `${((pos + 1) / visible.length) * 100}%` }} />
       <div className="deck__stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
         <Slide key={slide.id} />

@@ -2,7 +2,7 @@ import { LiveDemo } from '../layouts'
 import Embed from '../../shared/Embed'
 import type { SlideMeta } from '../types'
 
-export const meta: SlideMeta = { id: 's33', title: 'Live demo: Claude Code on a real task' }
+export const meta: SlideMeta = { id: 's33', title: 'Live demo: Claude Code on a real task', backup: true }
 
 export default function S33() {
   return (

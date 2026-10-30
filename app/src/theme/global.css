@@ -50,6 +50,10 @@ a { color: inherit; }
   background: rgba(255,255,255,0.15); border: 0; border-radius: 6px; padding: 6px 12px; color: #fff;
 }
 .deck__hud .spacer { flex: 1; }
+.deck__timer {
+  position: absolute; top: 5px; left: 14px; z-index: 6; font-size: 17px; font-weight: 600; letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, 0.38); mix-blend-mode: difference; user-select: none;
+}
 .deck__progress { position: absolute; top: 0; left: 0; height: 4px; background: var(--accent); z-index: 5; }
 
 .deck__notes {
