@@ -49,6 +49,12 @@ export class RequestContext {
     this.res.end(JSON.stringify(body))
   }
 
+  /** Send raw bytes (e.g. an image). */
+  bytes(status: number, contentType: string, body: Buffer, headers: Record<string, string> = {}): void {
+    this.res.writeHead(status, { 'Content-Type': contentType, 'Content-Length': body.length, ...headers })
+    this.res.end(body)
+  }
+
   ndjson(): NdjsonStream {
     return new NdjsonStream(this.res)
   }

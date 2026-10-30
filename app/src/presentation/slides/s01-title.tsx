@@ -1,11 +1,16 @@
-import { TitleSlide } from '../layouts'
-import { usePresenterName } from '../../shared/usePresenterName'
+import { Bookend } from '../Bookend'
 import type { SlideMeta } from '../types'
 
 export const meta: SlideMeta = { id: 's01', title: 'Title' }
 
-// The byline comes from PRESENTER_NAME in app/server/.env (served by /api/config); without it no byline is shown.
+// The team, presenter and logo come from app/server/.env (TEAM_NAME, TEAM_MEMBERS, PRESENTER_NAME, LOGO_PATH).
 export default function S01() {
-  const name = usePresenterName()
-  return <TitleSlide title="AI: From Attention to Agents" subtitle={name ? `By: ${name}` : undefined} />
+  return (
+    <Bookend title="Agentic AI">
+      <div className="bookend__topic">
+        <b>Topic:</b>
+        <p>Discover how autonomous AI agents reason, plan, use tools and execute tasks.</p>
+      </div>
+    </Bookend>
+  )
 }

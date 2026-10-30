@@ -18,7 +18,8 @@ import { SupportChainFactory } from './chain/SupportChainFactory.ts'
 import { AppConfig } from './config/AppConfig.ts'
 import { HttpServer } from './http/HttpServer.ts'
 import { ChainStreamRoute } from './http/routes/ChainStreamRoute.ts'
-import { ConfigRoute } from './http/routes/ConfigRoute.ts'
+import { LogoFile } from './config/LogoFile.ts'
+import { ConfigRoute, LogoRoute } from './http/routes/ConfigRoute.ts'
 import { HealthRoute } from './http/routes/HealthRoute.ts'
 import { ProvidersSelectRoute, ProvidersStateRoute } from './http/routes/ProvidersRoute.ts'
 import { RouteDefaultsRoute } from './http/routes/RouteDefaultsRoute.ts'
@@ -73,12 +74,14 @@ async function main(): Promise<void> {
   ])
   const agentPrompts = new AgentPromptCatalog()
   const agentService = new AgentService(new AgentLoop(provider, agentToolbox), provider, agentToolbox, agentPrompts, new AgentTaskCatalog(), new ScenarioCatalog(), files, new ApprovalBroker())
+  const logoFile = new LogoFile(config.logoPath)
   const server = new HttpServer(
     config.host,
     config.port,
     [
       new HealthRoute(service),
-      new ConfigRoute(config),
+      new ConfigRoute(config, logoFile),
+      new LogoRoute(logoFile),
       new StreamRoute(service, config.maxPromptChars, logger),
       new ChainStreamRoute(chainService, { maxChars: config.maxPromptChars, maxTurns: config.maxHistoryTurns }, logger),
       new RouteDefaultsRoute(routingService),

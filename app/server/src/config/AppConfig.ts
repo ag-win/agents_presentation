@@ -28,6 +28,14 @@ export class AppConfig {
   readonly bedrockModel: string
   /** The presenter's name for the title slide (PRESENTER_NAME in .env). Empty when not set. */
   readonly presenterName: string
+  /** The team's name for the first and last slides (TEAM_NAME). Empty when not set. */
+  readonly teamName: string
+  /** The team members' names (TEAM_MEMBERS, separated by commas), at most `AppConfig.maxTeamMembers`. */
+  readonly teamMembers: readonly string[]
+  /** Path of the logo image for the first and last slides (LOGO_PATH). Relative paths start from the app/ folder. */
+  readonly logoPath: string | undefined
+
+  static readonly maxTeamMembers = 10
 
   private constructor(values: {
     host: string
@@ -50,6 +58,9 @@ export class AppConfig {
     awsSessionToken: string | undefined
     bedrockModel: string
     presenterName: string
+    teamName: string
+    teamMembers: readonly string[]
+    logoPath: string | undefined
   }) {
     this.host = values.host
     this.port = values.port
@@ -71,6 +82,9 @@ export class AppConfig {
     this.awsSessionToken = values.awsSessionToken
     this.bedrockModel = values.bedrockModel
     this.presenterName = values.presenterName
+    this.teamName = values.teamName
+    this.teamMembers = values.teamMembers
+    this.logoPath = values.logoPath
   }
 
   /** True when Bedrock credentials are present (an API key, or an access key pair). */
@@ -104,6 +118,9 @@ export class AppConfig {
       // Amazon's own model: no marketplace subscription needed. Claude Haiku 5.5 is "global.anthropic.claude-haiku-5-5".
       bedrockModel: env.BEDROCK_MODEL?.trim() || 'global.amazon.nova-2-lite-v1:0',
       presenterName: (env.PRESENTER_NAME ?? '').trim().slice(0, 80),
+      teamName: (env.TEAM_NAME ?? '').trim().slice(0, 80),
+      teamMembers: (env.TEAM_MEMBERS ?? '').split(/[,;\n]/).map((n) => n.trim().slice(0, 60)).filter(Boolean).slice(0, AppConfig.maxTeamMembers),
+      logoPath: env.LOGO_PATH?.trim() || undefined,
     })
   }
 }
