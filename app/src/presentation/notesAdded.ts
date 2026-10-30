@@ -1,6 +1,12 @@
 // Speaker notes written for this app (not from the original pptx), keyed by slide id.
 // They are appended after the pptx notes in notes.ts, which is kept verbatim.
 export const addedNotes: Record<string, string[]> = {
+  s03b: [
+    'THE POINT: before the history, say why it matters. Every AI agent you will see today has a large language model at its centre, and the LLM provides all of the intelligence: it understands the goal, plans the steps, decides what to do next and writes the text, code or tool calls.',
+    'THE DIAGRAM: the purple box is the agent. The green box in the middle is the LLM. The four purple-grey boxes around it (Tools, Memory, the Loop that runs it, Guardrails) are ordinary software. They give the model hands, a notebook, persistence and limits, but none of them can think. Every dashed line goes to the LLM.',
+    'THE CLAIM TO LAND: swap in a better LLM and the same agent gets smarter without changing the plumbing; take the LLM away and nothing is left but plumbing. That is why the next few slides trace how LLMs got here.',
+    'TRANSITION: "So where did these models come from? Let us follow the spine of the story, starting in 2017."',
+  ],
   s20: [
     'LIVE DEMO: ROUTING (a search engine). Open it with the "Live demo" button at the top right. Esc or × closes it. Every search starts from a clean slate (boxes, numbers, lines and the page all reset). Your edits to the system prompts are kept until you press Reset.',
     'HOW IT IS LAID OUT: on the left, a browser whose address bar is the search box. Type a query and press Enter, or click one of the four example searches. On the right: Input, a Router LLM, four assistants (Food, Travel, Health, General) and Output. The numbers show the order the boxes light up. The thick dotted line is the path this search is taking; the thin ones are the paths it did not take. The browser shows real web results from Brave Search and the answer from the assistant that was chosen.',

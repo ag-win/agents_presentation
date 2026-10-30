@@ -1,4 +1,4 @@
-import { Diagram, Edge, Label, Node, curve, curveV, line } from './kit'
+import { Diagram, Edge, Group, Label, Node, curve, curveV, line } from './kit'
 
 /**
  * Workflow diagrams, drawn in SVG. Coordinates are centre-based within each viewBox.
@@ -26,6 +26,28 @@ export function AugmentedLLM() {
       <Node x={249} y={372} w={172} h={66} kind="logic" lines="Retrieval" size={26} />
       <Node x={450} y={392} w={150} h={66} kind="logic" lines="Tools" size={26} />
       <Node x={650} y={372} w={172} h={66} kind="logic" lines="Memory" size={26} />
+    </Diagram>
+  )
+}
+
+/** An agent drawn as an LLM with plumbing around it: the LLM supplies the intelligence, everything else supports it. */
+export function AgentBackbone() {
+  return (
+    <Diagram w={900} h={640} label="An AI agent: the LLM at the centre supplies the intelligence; tools, memory, the loop and guardrails surround it">
+      <Group x={20} y={50} w={860} h={570} title="AI agent" tone="purple" titleY={34} titleSize={30} />
+      <Node x={450} y={335} w={260} h={140} kind="llm" lines={['LLM', 'the intelligence']} size={34} strong />
+      <Node x={450} y={140} w={200} h={70} kind="logic" lines="Tools" size={28} />
+      <Node x={135} y={335} w={170} h={70} kind="logic" lines="Memory" size={28} />
+      <Node x={765} y={335} w={170} h={70} kind="logic" lines={['Loop', '(the harness)']} size={24} />
+      <Node x={450} y={540} w={230} h={70} kind="logic" lines="Guardrails" size={28} />
+      <Edge d={line(450, 175, 450, 265)} style="dashed" tone="soft" both />
+      <Edge d={line(220, 335, 320, 335)} style="dashed" tone="soft" both />
+      <Edge d={line(580, 335, 680, 335)} style="dashed" tone="soft" both />
+      <Edge d={line(450, 405, 450, 505)} style="dashed" tone="soft" both />
+      <Label x={560} y={218} lines="acts" size={22} />
+      <Label x={270} y={304} lines="recalls" size={22} />
+      <Label x={630} y={304} lines="repeats" size={22} />
+      <Label x={560} y={462} lines="checks" size={22} />
     </Diagram>
   )
 }
