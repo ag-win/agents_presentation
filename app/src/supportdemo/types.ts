@@ -125,6 +125,9 @@ export interface SupportSnapshot {
   readonly reply: ReplyView | null
   readonly toolLog: ToolLog | null
   readonly error: string | null
+  /** When the message was sent and how long the run took (null until it ends). */
+  readonly startedAt: number | null
+  readonly elapsedMs: number | null
   readonly dots: readonly SupportDot[]
   readonly slowmo: Slowmo
   readonly backend: BackendStatus

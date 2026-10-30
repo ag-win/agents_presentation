@@ -1,0 +1,43 @@
+/* The agent demo. Reuses the support desk's board, panel and zoom styles (support.css); this adds the toolbox,
+   the boxes that appear as the model decides, and the tool-signature dots. Nothing under 19px. */
+
+/* ---------- the toolbox ---------- */
+.ag-group { border-color: rgba(20, 22, 28, 0.2); }
+.ag-pal { position: absolute; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 8px 0 12px; border: 3px solid var(--cat); background: var(--cat-bg); color: var(--cat-ink); border-radius: 10px; font-family: inherit; cursor: pointer; transition: opacity 0.2s, border-color 0.2s; text-align: left; }
+.ag-pal--shop { --cat: #c58a1a; --cat-bg: #fff6df; --cat-ink: #6b4700; }
+.ag-pal--web { --cat: #3b82c4; --cat-bg: #e3f0ff; --cat-ink: #174f86; }
+.ag-pal--files { --cat: #7a6fc9; --cat-bg: #eeedf9; --cat-ink: #4c3fa5; }
+.ag-pal--agents { --cat: #c2410c; --cat-bg: #ffe9df; --cat-ink: #8a2f08; }
+.ag-pal__label { font-size: 20px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ag-pal__switch { flex: none; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--cat); background: var(--cat); color: #fff; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.ag-pal__switch.is-locked { opacity: 0.5; }
+.ag-pal.is-off { opacity: 0.45; }
+.ag-pal.is-off .ag-pal__label { text-decoration: line-through; }
+.ag-pal.is-off .ag-pal__switch { background: transparent; }
+.ag-pal.is-glowing { border-color: #f59e0b; animation: demo-glow 0.9s ease-in-out infinite alternate; }
+.ag-pal.is-open { outline: 4px solid rgba(122, 111, 201, 0.6); outline-offset: 2px; }
+.ag-pal__used { position: absolute; left: -12px; top: -14px; min-width: 34px; height: 28px; padding: 0 6px; border-radius: 14px; background: #f59e0b; color: #fff; font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); animation: sup-pop 0.35s ease-out; }
+.ag-thin-tool { stroke: #1f8f86; stroke-width: 3; opacity: 0.7; }
+.ag-thick-tool { stroke: #0f766e; stroke-width: 7; }
+.sdot--tools { background: radial-gradient(circle, #fff 0%, #b7f0e8 35%, #0f766e 100%); box-shadow: 0 0 20px 7px rgba(15, 118, 110, 0.7); width: 26px; height: 26px; margin: -13px 0 0 -13px; }
+.sdot--merged { box-shadow: 0 0 0 9px rgba(15, 118, 110, 0.85), 0 0 26px 10px rgba(245, 158, 11, 0.85); }
+
+/* ---------- boxes the model creates ---------- */
+.ag-node { flex-direction: column; gap: 1px; padding: 0 8px; transition: left 0.45s ease, top 0.45s ease, opacity 0.3s, border-color 0.2s; }
+.ag-node small { font-size: 19px; font-weight: 600; opacity: 0.85; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ag-node--spawn { --box-fill: #ffe9df; --box-stroke: #c2410c; --box-ink: #8a2f08; border-radius: 22px; }
+.ag-appear { animation: ag-appear 0.45s ease-out; }
+@keyframes ag-appear { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+.ag-subcard { border-color: rgba(194, 65, 12, 0.55); background: rgba(194, 65, 12, 0.05); }
+.ag-subcard span { color: #8a2f08; }
+.ag-ghost { position: absolute; z-index: 1; display: flex; align-items: center; justify-content: center; border: 3px dashed rgba(20, 22, 28, 0.28); border-radius: 8px; color: rgba(20, 22, 28, 0.4); font-size: 20px; font-weight: 700; pointer-events: none; }
+.ag-ghost--out { border-radius: 28px; }
+
+/* ---------- panels ---------- */
+.ag-subtabs { display: flex; gap: 8px; flex: none; }
+.ag-subtabs button { flex: 1; border: 2px solid #d3d7df; background: #f3f4f7; border-radius: 999px; padding: 2px 10px; font-size: 20px; font-weight: 700; color: #667085; }
+.ag-subtabs button.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ag-toggle { margin: 4px 0 6px; padding: 4px 18px; font-size: 22px; }
+
+/* an LLM box's verdict ("2 tools", "final answer") hangs below it so it never covers the label */
+.ag-chip-below .sverdict { top: auto; bottom: -36px; right: 50%; transform: translateX(50%); }

@@ -50,7 +50,7 @@ export class SupportSession {
     if (!message || this.snapshot.busy) return
     this.abort = new AbortController()
     this.scheduler.clear()
-    this.snapshot = { ...this.initial(this.snapshot.slowmo, this.snapshot.backend), message, busy: true }
+    this.snapshot = { ...this.initial(this.snapshot.slowmo, this.snapshot.backend), message, busy: true, startedAt: performance.now() }
     this.emit()
     this.prompts.lock()
     const { slowmo } = this.snapshot
@@ -111,7 +111,7 @@ export class SupportSession {
     this.nextRow = 1
     return {
       message: '', busy: false, nodes: {}, counter: 0, thick: [], routed: null, trace: [], reply: null, toolLog: null,
-      error: null, dots: [], slowmo, backend,
+      error: null, startedAt: null, elapsedMs: null, dots: [], slowmo, backend,
     }
   }
 
@@ -219,7 +219,8 @@ export class SupportSession {
         this.prompts.unlock()
         const trace = this.snapshot.trace.map((r) => (r.live ? { ...r, live: false } : r))
         const nodes = Object.fromEntries(Object.entries(this.snapshot.nodes).map(([id, n]) => [id, n.glow ? { ...n, glow: false } : n]))
-        this.update({ busy: false, error, trace, nodes })
+        const started = this.snapshot.startedAt
+        this.update({ busy: false, error, trace, nodes, elapsedMs: started === null ? null : performance.now() - started })
       },
     }
   }

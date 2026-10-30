@@ -15,9 +15,14 @@ export function TracePanel({ snap }: { snap: SupportSnapshot }) {
     return <div className="strace strace--empty"><p>Pick a message from the inbox. Each box that runs appears here, numbered in order.</p></div>
   }
   const reply = snap.reply
+  const llmCalls = snap.trace.filter((r) => r.kind === 'stage' && supportSession.layout.node(r.stage)?.kind === 'llm').length
+  const toolCalls = snap.trace.filter((r) => r.kind === 'tool').length
   return (
     <div className="strace" ref={scroller}>
       <div className="strace__customer"><b>Customer</b><p>{snap.message}</p></div>
+      <div className="ag-stats" aria-label="Run statistics">
+        <span><b>{llmCalls}</b> LLM calls</span><span><b>{toolCalls}</b> tool calls</span><span><b>{snap.elapsedMs === null ? '…' : `${(snap.elapsedMs / 1000).toFixed(1)} s`}</b></span>
+      </div>
       {snap.trace.map((r) => (
         <div key={r.id} className={`strace__row${r.live ? ' is-live' : ''}${r.kind === 'tool' ? ' is-tool' : ''}`}>
           <span className="strace__num">{r.number ?? '⚙'}</span>
