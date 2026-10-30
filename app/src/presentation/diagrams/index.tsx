@@ -1,4 +1,4 @@
-import { Diagram, Edge, Group, Label, Node, curve, curveV, line } from './kit'
+import { Diagram, Edge, Label, Node, curve, curveV, line } from './kit'
 
 /**
  * Workflow diagrams, drawn in SVG. Coordinates are centre-based within each viewBox.
@@ -175,85 +175,54 @@ export function ObserveReasonAct() {
   )
 }
 
-/** Customer-support agent, technical-ticket path: Routing -> Orchestrator-Workers -> Evaluator-Optimizer. */
-export function SupportNested() {
+/** The ShopEase support desk: guard, router, seven paths (one per pattern), a quality check and the reply. */
+export function ShopEaseDesk() {
+  const xs = [140, 400, 660, 920, 1180, 1440, 1700]
+  const paths: { name: string; pattern: string }[] = [
+    { name: 'Complaint', pattern: 'prompt chain' },
+    { name: 'Order status', pattern: 'tool call' },
+    { name: 'Product', pattern: 'parallel' },
+    { name: 'Several issues', pattern: 'orchestrator-workers' },
+    { name: 'Feedback', pattern: 'simple reply' },
+    { name: 'Angry / payment', pattern: 'human approves' },
+    { name: 'Anything else', pattern: 'policy answer' },
+  ]
   return (
-    <Diagram w={1840} h={960} label="Customer-support agent, technical ticket path: routing, then orchestrator-workers, then evaluator-optimizer">
-      <text x={40} y={44} fontSize={30} fontWeight={700} fill="var(--ink)">Example: Customer-support agent (Technical ticket path)</text>
+    <Diagram w={1840} h={700} label="ShopEase support desk: message, guard, router, seven paths, quality check, reply">
+      <Node x={560} y={70} w={190} h={70} kind="io" lines="Message" size={28} />
+      <Node x={860} y={70} w={210} h={84} kind="llm" lines={['Guard', 'guardrail']} size={26} />
+      <Node x={1180} y={70} w={210} h={84} kind="llm" lines={['Router', 'routing']} size={26} />
+      <Edge d={line(655, 70, 755, 70)} />
+      <Edge d={line(965, 70, 1075, 70)} />
 
-      <Group x={150} y={120} w={520} h={560} title="1. Routing" tone="purple" />
-      <Group x={700} y={150} w={690} h={470} title="2. Orchestrator–Workers" tone="teal" />
-      <Group x={1010} y={664} w={720} h={266} title="3. Evaluator–Optimizer" tone="orange" titleY={650} />
+      {paths.map((p, i) => (
+        <g key={p.name}>
+          <Node x={xs[i]} y={310} w={236} h={108} kind={i === 5 ? 'hot' : 'llm'} lines={[p.name, p.pattern]} size={25} />
+          <Edge d={curveV(1180, 112, xs[i], 256)} style="dotted" />
+        </g>
+      ))}
 
-      <Node x={70} y={400} w={100} h={60} kind="io" lines="In" />
-      <Node x={275} y={400} w={170} h={90} kind="llm" lines={['LLM Call', 'Router']} />
-      <Node x={560} y={200} w={170} h={56} kind="llm" lines="Billing LLM" size={22} />
-      <Node x={560} y={600} w={170} h={56} kind="llm" lines="General LLM" size={22} />
-      <Edge d={line(120, 400, 190, 400)} />
-      <Edge d={curve(360, 365, 475, 200)} style="dotted" />
-      <Label x={414} y={282} lines="Billing" />
-      <Edge d={curve(360, 435, 475, 600)} style="dotted" />
-      <Label x={414} y={528} lines="General" />
+      {xs.slice(0, 4).concat(xs.slice(4, 5), xs.slice(6)).map((x) => (
+        <Edge key={x} d={curveV(x, 364, 920, 520)} />
+      ))}
+      <Edge d="M 1440 364 C 1440 470, 1560 560, 1560 600" style="dashed" />
+      <Label x={1530} y={470} lines="a person approves" size={22} />
 
-      <Node x={810} y={400} w={180} h={62} kind="llm" lines="Orchestrator" size={22} />
-      <Edge d={line(360, 400, 720, 400)} />
-      <Label x={550} y={382} lines="Technical" />
-      <Node x={1090} y={240} w={150} h={56} kind="llm" lines={['Diagnose', 'Issue']} size={17} />
-      <Node x={1090} y={400} w={150} h={56} kind="llm" lines={['Search', 'Docs']} size={17} />
-      <Node x={1090} y={560} w={150} h={56} kind="llm" lines={['Check', 'Logs']} size={17} />
-      <Node x={1300} y={400} w={150} h={62} kind="llm" lines="Synthesizer" size={22} />
-      <Edge d={curve(900, 382, 1015, 240)} style="dotted" />
-      <Edge d={line(900, 400, 1015, 400)} style="dotted" />
-      <Edge d={curve(900, 418, 1015, 560)} style="dotted" />
-      <Edge d={curve(1165, 240, 1235, 384)} style="dotted" />
-      <Edge d={line(1165, 400, 1225, 400)} style="dotted" />
-      <Edge d={curve(1165, 560, 1235, 416)} style="dotted" />
-
-      <Node x={1150} y={790} w={170} h={74} kind="llm" lines={['LLM Call', 'Generator']} size={22} />
-      <Node x={1560} y={790} w={170} h={74} kind="llm" lines={['LLM Call', 'Evaluator']} size={22} />
-      <Node x={1790} y={790} w={90} h={60} kind="io" lines="Out" />
-      <Edge d={curveV(1300, 431, 1150, 752)} />
-      <Label x={1336} y={556} lines="Draft" />
-      <Edge d="M 1225 753 C 1285 690, 1425 690, 1485 753" />
-      <Label x={1355} y={702} lines="Solution" />
-      <Edge d="M 1485 827 C 1425 890, 1285 890, 1225 827" />
-      <Label x={1355} y={902} lines={['Rejected +', 'Feedback']} />
-      <Edge d={line(1645, 790, 1742, 790)} />
-      <Label x={1690} y={820} lines="Accepted" size={17} />
+      <Node x={920} y={560} w={300} h={90} kind="llm" lines={['Quality check', 'evaluator-optimizer']} size={26} />
+      <Node x={1560} y={630} w={250} h={70} kind="io" lines="Reply" size={28} />
+      <Edge d={line(1070, 575, 1435, 630)} />
+      <Label x={1255} y={575} lines="pass" size={22} />
+      <Path_Revise />
     </Diagram>
   )
 }
 
-/** Router agent whose refund path runs an evaluator-optimizer loop. */
-export function ThreePatterns() {
+function Path_Revise() {
   return (
-    <Diagram w={1840} h={830} label="Router agent with an evaluator-optimizer loop on the refund path">
-      <Group x={30} y={70} w={1780} h={740} title="Router Agent" tone="purple" titleY={46} titleSize={32} solid />
-      <Group x={960} y={270} w={720} h={330} title="Evaluator–Optimizer" tone="orange" titleY={254} titleSize={28} />
-
-      <Node x={130} y={420} w={110} h={66} kind="io" lines="In" />
-      <Node x={400} y={420} w={200} h={100} kind="llm" lines={['LLM Call', 'Router']} size={28} />
-      <Node x={870} y={205} w={230} h={64} kind="llm" lines="Technical LLM" size={26} />
-      <Node x={870} y={650} w={230} h={64} kind="llm" lines="General LLM" size={26} />
-      <Node x={1090} y={420} w={190} h={84} kind="llm" lines={['LLM Call', 'Generator']} size={26} />
-      <Node x={1480} y={420} w={190} h={84} kind="llm" lines={['LLM Call', 'Evaluator']} size={26} />
-      <Node x={1730} y={420} w={100} h={66} kind="io" lines="Out" />
-
-      <Edge d={line(185, 420, 300, 420)} />
-      <Edge d={curve(500, 380, 755, 205)} style="dotted" />
-      <Label x={622} y={286} lines="Technical" size={20} />
-      <Edge d={line(500, 420, 995, 420)} />
-      <Label x={750} y={400} lines="Refund" size={20} />
-      <Edge d={curve(500, 460, 755, 650)} style="dotted" />
-      <Label x={622} y={562} lines="General" size={20} />
-
-      <Edge d="M 1160 378 C 1230 305, 1340 305, 1410 378" />
-      <Label x={1285} y={318} lines="Solution" size={20} />
-      <Edge d="M 1410 462 C 1340 535, 1230 535, 1160 462" />
-      <Label x={1285} y={560} lines={['Rejected +', 'Feedback']} size={20} />
-      <Edge d={line(1575, 420, 1676, 420)} />
-      <Label x={1628} y={450} lines="Accepted" size={18} />
-    </Diagram>
+    <>
+      <Edge d="M 870 606 C 820 660, 1020 660, 970 606" style="dotted" />
+      <Label x={920} y={668} lines="fail: revise once" size={22} />
+    </>
   )
 }
 

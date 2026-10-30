@@ -227,3 +227,9 @@ a { color: inherit; }
 .live-demo-btn:hover, .live-demo-btn:focus-visible { background: var(--accent); color: #fff; }
 .live-demo-btn--card { position: absolute; right: 18px; top: 18px; }
 .live-demo-btn--top { position: absolute; top: 72px; right: 96px; }
+
+/* A clearly visible label for invented scenarios, so the audience never mistakes them for real events. */
+.fiction {
+  align-self: flex-start; margin-bottom: 18px; padding: 6px 20px; border: 3px dashed var(--accent); border-radius: 999px;
+  color: var(--accent); font-size: 26px; font-weight: 700; letter-spacing: 0.06em;
+}
