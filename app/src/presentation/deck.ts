@@ -3,7 +3,6 @@ import { notes } from './notes'
 import { addedNotes } from './notesAdded'
 import type { SlideDef, SlideMeta } from './types'
 import * as s01 from './slides/s01-title'
-import * as s02 from './slides/s02-historically'
 import * as s03 from './slides/s03-div-intro'
 import * as s03b from './slides/s03b-llm-backbone'
 import * as s04 from './slides/s04-attention'
@@ -50,7 +49,6 @@ function def(m: { meta: SlideMeta; default: ComponentType }): SlideDef {
 /** The deck, in presentation order. Reorder, add or remove slides by editing this list. */
 export const slides: SlideDef[] = [
   def(s01),
-  def(s02),
   def(s03),
   def(s03b),
   def(s04),

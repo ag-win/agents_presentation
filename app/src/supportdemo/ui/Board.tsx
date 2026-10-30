@@ -20,20 +20,23 @@ interface BoardProps {
   snap: SupportSnapshot
   layout: SupportLayout
   selected: string | null
+  /** Replaces the default click (open the inspector). The slide uses it to zoom. */
+  onNodeClick?: (id: string) => void
+  onCardClick?: (branch: string) => void
 }
 
 /**
  * The whole support desk on one board: Message -> Guard -> Router, seven branch cards, the quality check and the reply.
  * Boxes glow and take the next number as they run; the lines the message has travelled turn thick amber.
  */
-export function Board({ snap, layout, selected }: BoardProps) {
+export function Board({ snap, layout, selected, onNodeClick, onCardClick }: BoardProps) {
   const nodeOf = (id: string): NodeState => snap.nodes[id] ?? BLANK_NODE
   const dimBranch = (branch: string | null) => snap.routed !== null && branch !== null && branch !== snap.routed
 
   return (
     <div className="sb" style={{ width: SupportLayout.width, height: SupportLayout.height }}>
       {layout.cards.map((c) => (
-        <div key={c.branch} className={`sb-card${dimBranch(c.branch) ? ' is-dim' : ''}${snap.routed === c.branch ? ' is-chosen' : ''}`} style={{ left: c.x, top: c.y, width: c.w, height: c.h }}>
+        <div key={c.branch} className={`sb-card${dimBranch(c.branch) ? ' is-dim' : ''}${snap.routed === c.branch ? ' is-chosen' : ''}${onCardClick ? ' sb-card--link' : ''}`} onClick={onCardClick ? () => onCardClick(c.branch) : undefined} style={{ left: c.x, top: c.y, width: c.w, height: c.h }}>
           <span>{c.title}</span>
         </div>
       ))}
@@ -48,7 +51,7 @@ export function Board({ snap, layout, selected }: BoardProps) {
         const open = selected === spec.id
         const cls = ['sb-node', `sb-node--${spec.kind}`, node.glow ? 'is-glowing' : '', dimBranch(spec.branch) || node.caption === 'unused' ? 'is-dim' : '', open ? 'is-open' : ''].filter(Boolean).join(' ')
         return (
-          <button key={spec.id} type="button" className={cls} style={{ left: spec.x, top: spec.y, width: spec.w, height: spec.h, ...(spec.w < 130 ? { padding: '0 3px' } : {}) }} onClick={() => supportPrompts.toggle(spec.id)} aria-pressed={open} aria-label={`${spec.label}: show details`}>
+          <button key={spec.id} type="button" className={cls} style={{ left: spec.x, top: spec.y, width: spec.w, height: spec.h, ...(spec.w < 130 ? { padding: '0 3px' } : {}) }} onClick={() => (onNodeClick ? onNodeClick(spec.id) : supportPrompts.toggle(spec.id))} aria-pressed={onNodeClick ? undefined : open} aria-label={`${spec.label}: show details`}>
             {spec.id === 'output' ? (
               <>
                 <span className="sb-node__head">REPLY TO THE CUSTOMER</span>

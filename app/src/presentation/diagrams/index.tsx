@@ -1,4 +1,4 @@
-import { Diagram, Edge, Group, Label, Node, curve, curveV, line } from './kit'
+import { Diagram, Edge, Group, Label, Node, curve, line } from './kit'
 
 /**
  * Workflow diagrams, drawn in SVG. Coordinates are centre-based within each viewBox.
@@ -194,57 +194,6 @@ export function ObserveReasonAct() {
         d="M 1020 60 H 1056 A 24 24 0 0 1 1080 84 V 176 A 24 24 0 0 1 1056 200 H 44 A 24 24 0 0 1 20 176 V 84 A 24 24 0 0 1 44 60 H 78"
       />
     </Diagram>
-  )
-}
-
-/** The ShopEase support desk: guard, router, seven paths (one per pattern), a quality check and the reply. */
-export function ShopEaseDesk() {
-  const xs = [140, 400, 660, 920, 1180, 1440, 1700]
-  const paths: { name: string; pattern: string }[] = [
-    { name: 'Complaint', pattern: 'prompt chain' },
-    { name: 'Order status', pattern: 'tool call' },
-    { name: 'Product', pattern: 'parallel' },
-    { name: 'Several issues', pattern: 'orchestrator-workers' },
-    { name: 'Feedback', pattern: 'simple reply' },
-    { name: 'Angry / payment', pattern: 'human approves' },
-    { name: 'Anything else', pattern: 'policy answer' },
-  ]
-  return (
-    <Diagram w={1840} h={700} label="ShopEase support desk: message, guard, router, seven paths, quality check, reply">
-      <Node x={560} y={70} w={190} h={70} kind="io" lines="Message" size={28} />
-      <Node x={860} y={70} w={210} h={84} kind="llm" lines={['Guard', 'guardrail']} size={26} />
-      <Node x={1180} y={70} w={210} h={84} kind="llm" lines={['Router', 'routing']} size={26} />
-      <Edge d={line(655, 70, 755, 70)} />
-      <Edge d={line(965, 70, 1075, 70)} />
-
-      {paths.map((p, i) => (
-        <g key={p.name}>
-          <Node x={xs[i]} y={310} w={236} h={108} kind={i === 5 ? 'hot' : 'llm'} lines={[p.name, p.pattern]} size={25} />
-          <Edge d={curveV(1180, 112, xs[i], 256)} style="dotted" />
-        </g>
-      ))}
-
-      {xs.slice(0, 4).concat(xs.slice(4, 5), xs.slice(6)).map((x) => (
-        <Edge key={x} d={curveV(x, 364, 920, 520)} />
-      ))}
-      <Edge d="M 1440 364 C 1440 470, 1560 560, 1560 600" style="dashed" />
-      <Label x={1530} y={470} lines="a person approves" size={22} />
-
-      <Node x={920} y={560} w={300} h={90} kind="llm" lines={['Quality check', 'evaluator-optimizer']} size={26} />
-      <Node x={1560} y={630} w={250} h={70} kind="io" lines="Reply" size={28} />
-      <Edge d={line(1070, 575, 1435, 630)} />
-      <Label x={1255} y={575} lines="pass" size={22} />
-      <Path_Revise />
-    </Diagram>
-  )
-}
-
-function Path_Revise() {
-  return (
-    <>
-      <Edge d="M 870 606 C 820 660, 1020 660, 970 606" style="dotted" />
-      <Label x={920} y={668} lines="fail: revise once" size={22} />
-    </>
   )
 }
 
