@@ -1,3 +1,12 @@
+import { AgentLoop } from './agent/AgentLoop.ts'
+import { AgentPromptCatalog } from './agent/AgentPrompts.ts'
+import { AgentTaskCatalog } from './agent/AgentTaskCatalog.ts'
+import { AgentToolbox } from './agent/AgentTool.ts'
+import { FileSandbox } from './agent/FileSandbox.ts'
+import { EscalateTool, FeedbackTool, OrderStatusAgentTool, ProductReviewsTool, ProductSpecsTool, ShopPolicyTool } from './agent/tools/ShopTools.ts'
+import { AskModelTool, CalculatorTool, ReadFileTool, SpawnAgentTool, WebSearchTool, WriteFileTool } from './agent/tools/GeneralTools.ts'
+import { AgentService } from './application/AgentService.ts'
+import { AgentDefaultsRoute, AgentStreamRoute, AgentWorkspaceClearRoute } from './http/routes/AgentRoutes.ts'
 import { ChainService } from './application/ChainService.ts'
 import { PromptComposer } from './application/PromptComposer.ts'
 import { ProviderSwitchService } from './application/ProviderSwitchService.ts'
@@ -30,6 +39,7 @@ import { ToolLoop } from './tools/ToolLoop.ts'
 import { ToolRegistry } from './tools/ToolRegistry.ts'
 import { SwitchableSearchProvider } from './search/SwitchableSearchProvider.ts'
 import { SearchProviderFactory } from './search/SearchProviderFactory.ts'
+import { fileURLToPath } from 'node:url'
 import { ConsoleLogger } from './logging/Logger.ts'
 
 /** Composition root: the only place where concrete classes are chosen and wired together. */
@@ -53,6 +63,14 @@ async function main(): Promise<void> {
   const supportPrompts = SupportPromptCatalog.standard()
   const supportPipeline = new SupportPipeline({ provider, prompts: supportPrompts, orders, products: new ProductCatalog(), toolLoop: new ToolLoop(provider, tools) })
   const supportService = new SupportService(supportPipeline, provider, supportPrompts, new ScenarioCatalog(), tools, orders)
+  const products = new ProductCatalog()
+  const files = new FileSandbox(fileURLToPath(new URL('../workspace/', import.meta.url)))
+  const agentToolbox = new AgentToolbox([
+    new OrderStatusAgentTool(orders), new ProductSpecsTool(products), new ProductReviewsTool(products), new ShopPolicyTool(), new FeedbackTool(), new EscalateTool(),
+    new WebSearchTool(search), new CalculatorTool(), new WriteFileTool(files), new ReadFileTool(files), new AskModelTool(), new SpawnAgentTool(),
+  ])
+  const agentPrompts = new AgentPromptCatalog()
+  const agentService = new AgentService(new AgentLoop(provider, agentToolbox), provider, agentToolbox, agentPrompts, new AgentTaskCatalog(), new ScenarioCatalog(), files)
   const server = new HttpServer(
     config.host,
     config.port,
@@ -65,6 +83,9 @@ async function main(): Promise<void> {
       new ProvidersSelectRoute(switcher),
       new RouteStreamRoute(routingService, { maxQuery: 300, maxSystem: 1500 }, logger),
       new SupportDefaultsRoute(supportService),
+      new AgentDefaultsRoute(agentService),
+      new AgentStreamRoute(agentService, { maxTask: 600, maxSystem: 3000 }, logger),
+      new AgentWorkspaceClearRoute(agentService),
       new SupportStreamRoute(supportService, { maxMessage: 600, maxSystem: 2500 }, logger),
     ],
     logger,

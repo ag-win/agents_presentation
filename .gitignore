@@ -14,3 +14,6 @@ dist/
 # Editor / OS
 .DS_Store
 *.log
+
+# Files the demo agent writes
+app/server/workspace/
