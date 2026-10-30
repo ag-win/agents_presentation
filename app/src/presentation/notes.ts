@@ -1,7 +1,13 @@
 // Speaker notes carried over verbatim from the original pptx, keyed by slide id (sNN = original slide number).
 // Many are build/verification flags: keep them until each claim has been re-checked.
 export const notes: Record<string, string[]> = {
-  s04: ["BUILD NOTE: The attention diagram is a simplified reconstruction. The source PDF (Vaswani et al., 2017, arXiv:1706.03762) was not supplied — verify the architecture figure from the paper before the talk and replace this diagram if a cleaner version renders at scale."],
+  s04: [
+    "Neural network models have been used for years on tasks like translating one language into another. Many of them were built around a technique called recurrence, which is why they’re called recurrent neural networks, or RNNs. When we read, we make sense of the current word by remembering the words that came before it. Recurrence worked the same way: the model read one word at a time and kept a running summary of everything so far.",
+    "The problem was that the summary faded. On long sentences, RNNs kept forgetting earlier words as they read forward, and translations got worse the longer the sentence ran.",
+    "In 2014, researchers added a technique called attention to fix this. The network still read one word at a time, but now it could look back at any word in the source sentence, near or far, and pick out the ones that mattered for the word it was translating.",
+    "Then, in 2017, a team at Google asked what would happen if they removed recurrence completely and kept only attention. Without the one-word-at-a-time loop, the model could take in the whole sentence in one go and work out the meaning of each word by drawing on the other words in the sentence. Because no word had to wait for the one before it, training could run in parallel instead of step by step. The catch was that the model lost its sense of word order, which recurrence had given it for free. They solved that by adding position information to each word’s input.",
+    "The result trained much faster, beat the best RNN translation models, and became known as the transformer.",
+  ],
   s05: ["VERIFIED (web search, Aug 2026): 117M parameter count for GPT-1 (Radford et al., June 2018) confirmed across multiple independent secondary sources describing the paper. Benchmark results (MultiNLI, RACE, Story Cloze) were not individually re-verified — none appear on this slide, so no correction needed."],
   s06: ["BUILD NOTE: Exact GPT-3 few-shot benchmark results (e.g. SuperGLUE, TriviaQA) and the precise 175B count should be verified from Brown et al. 2020 (arXiv:2005.14165). GPT-2 parameter count (~1.5B for largest) should be verified from Radford et al. 2019. Source PDFs were not supplied."],
   s07: ["BUILD NOTE: The three-stage RLHF pipeline structure should be verified against Figure 2 in Ouyang et al. 2022. Source PDF was not supplied — check that the diagram shape matches the paper's own figure before presenting."],
